@@ -22,6 +22,37 @@ your analysis must start from the raw CSV file containing the data. You cannot
 do any preprocessing outside the document. If preprocessing is time-consuming 
 you may consider using the `cache = TRUE` option for certain code chunks.*
 
+```{r libraries}
+# data.table is required for one function only, "fread". We won't load the
+# entire package because its namespace overlaps some other functions we use.
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(lubridate))
+```
+```{r load-data, cache=TRUE}
+df <- as_tibble(data.table::fread(file = "repdata_data_StormData.csv.bz2"))
+df <- rename(df, state_num = STATE__, longitude_e = LONGITUDE_)
+names(df) <- tolower(names(df))
+# these variables are all 0 and all NA, respectively
+df <- select(df, -c(county_end, countyendn))
+# convert character date strings into Date objects
+date <- sapply(str_split(df$bgn_date, " "), function(s) {s[1]})
+hour <- sapply(df$bgn_time, function(t) {substr(t, 1, 2)})
+minute <- sapply(df$bgn_time, function(t) {substr(t, 3, 4)})
+
+# TODO: use mapply? as.POSIX lets you specify a timezone, but
+# not vectorized. So mapply over mdy(date), hour, minute, and df$time_zone?
+# Or use that vectorize function..?
+dt <- as.POSIXct(paste0(mdy(date), " ", hour, ":", minute, ":00"))
+
+
+# df$bgn_date <- mdy(tmp)
+# tmp <- sapply(str_split(df$end_date, " "), function(s) {s[1]})
+# df$end_date <- mdy(tmp)
+# rm(tmp)
+```
+
+Possible values are NA (the default, when type.convert is used), "NULL" (when the column is skipped), one of the atomic vector classes (logical, integer, numeric, complex, character, raw), or "factor", "Date" or "POSIXct". 
+
 ## Results
 *There should be a section titled Results in which your results are presented.*
 
