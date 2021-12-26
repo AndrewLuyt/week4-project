@@ -36,40 +36,6 @@ names(df) <- tolower(names(df))
 # these variables are all 0 and all NA, respectively
 df <- select(df, -c(county_end, countyendn))
 
-# convert character date strings into Date objects.
-date <- sapply(str_split(df$bgn_date, " "), function(s) {s[1]})
-hour <- sapply(df$bgn_time, function(t) {substr(t, 1, 2)})
-minute <- sapply(df$bgn_time, function(t) {substr(t, 3, 4)})
-# remove the "0:00:00" portion of dates
-df <- df %>% 
-    separate(bgn_date, into = c("bgn_date", "junk"), sep = " ") %>% 
-    separate(end_date, into = c("end_date", "junk"), sep = " ") %>% 
-    select(-junk)
-
-# standardize all timezone codes as upper case
-df$time_zone <- toupper(df$time_zone)
-
-# We need to replace the time zone names. Some of these names, such as
-# "CST", are not recognized as time zones on my system so
-# we will replace them all with a very generic equivalent in GMT.
-# See OlsonNames() for a list of timezones recognized, and
-# https://en.wikipedia.org/wiki/List_of_time_zone_abbreviations
-# Some are typos or non-standard abbreviations eg GST for Guam Standard Time.
-#
-# Pass in the vector of timezone abbreviations and it returns a vector of
-# the system-recognized timezones. Assumes timezones are all uppercase.
-generic_tz <- function(timezones) {
-    old <-  c("ADT",       "AKS",       "AST",       "CDT",       "CSC",       "CST",       "EDT",       "EST",       "ESY",       "GMT",       "GST",       "HST",        "MDT",       "MST",       "PDT",       "PST",       "SCT",       "SST",        "UNK",       "UTC")
-    new <- c("Etc/GMT-3", "Etc/GMT-9", "Etc/GMT-4", "Etc/GMT-5", "Etc/GMT-6", "Etc/GMT-6", "Etc/GMT-4", "Etc/GMT-5", "Etc/GMT-5", "GMT", "Etc/GMT+10", "Etc/GMT-10", "Etc/GMT-6", "Etc/GMT-7", "Etc/GMT-7", "Etc/GMT-8", "Etc/GMT-5", "Etc/GMT+10", "Etc/GMT-6", "Etc/GMT0")
-    for (i in 1:length(old)) {
-        timezones <- str_replace(timezones, fixed(old[[i]]), new[[i]])
-    }
-    timezones
-}
-
-df$time_zone <- generic_tz(df$time_zone)
-
-
 
 ```
 
