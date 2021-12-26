@@ -5,3 +5,4 @@
 *.pdf
 *.bz2
 head.csv
+*_cache
