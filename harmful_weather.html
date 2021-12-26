@@ -178,6 +178,31 @@ pre code {
 <div id="data-processing" class="section level2">
 <h2>Data Processing</h2>
 <p><em>There should be a section titled Data Processing which describes (in words and code) how the data were loaded into R and processed for analysis. In particular, your analysis must start from the raw CSV file containing the data. You cannot do any preprocessing outside the document. If preprocessing is time-consuming you may consider using the <code>cache = TRUE</code> option for certain code chunks.</em></p>
+<pre class="r"><code># data.table is required for one function only, &quot;fread&quot;. We won&#39;t load the
+# entire package because its namespace overlaps some other functions we use.
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(lubridate))</code></pre>
+<pre class="r"><code>df &lt;- as_tibble(data.table::fread(file = &quot;repdata_data_StormData.csv.bz2&quot;))
+df &lt;- rename(df, state_num = STATE__, longitude_e = LONGITUDE_)
+names(df) &lt;- tolower(names(df))
+# these variables are all 0 and all NA, respectively
+df &lt;- select(df, -c(county_end, countyendn))
+# convert character date strings into Date objects
+date &lt;- sapply(str_split(df$bgn_date, &quot; &quot;), function(s) {s[1]})
+hour &lt;- sapply(df$bgn_time, function(t) {substr(t, 1, 2)})
+minute &lt;- sapply(df$bgn_time, function(t) {substr(t, 3, 4)})
+
+# TODO: use mapply? as.POSIX lets you specify a timezone, but
+# not vectorized. So mapply over mdy(date), hour, minute, and df$time_zone?
+# Or use that vectorize function..?
+dt &lt;- as.POSIXct(paste0(mdy(date), &quot; &quot;, hour, &quot;:&quot;, minute, &quot;:00&quot;))
+
+
+# df$bgn_date &lt;- mdy(tmp)
+# tmp &lt;- sapply(str_split(df$end_date, &quot; &quot;), function(s) {s[1]})
+# df$end_date &lt;- mdy(tmp)
+# rm(tmp)</code></pre>
+<p>Possible values are NA (the default, when type.convert is used), “NULL” (when the column is skipped), one of the atomic vector classes (logical, integer, numeric, complex, character, raw), or “factor”, “Date” or “POSIXct”.</p>
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>
