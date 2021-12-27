@@ -9,7 +9,7 @@ output:
 ---
 
 
-*Most recent update: 2021-12-26*
+*Most recent update: 2021-12-27*
 
 ## Synopsis
 *Immediately after the title, there should be a synopsis which describes and 
@@ -100,9 +100,15 @@ rm(ctmp, ptmp, cnew, pnew, old, new, i)
 
 ### Fixing `evtype`
 
-In the documentation there are 48 official allowable `evtype` values.
-In the dataset however, almost 1000 unique values exist. An examination of
-these shows this to have resulted from manual data entry. For example:
+`evtype` may be the most important variable in our dataset. Later we'll be
+aggregating human and financial damage via the values in `evtype` and it's
+important that they reflect what we think they do.
+
+In the NOAA documentation there are 48 official `evtype` values, corresponding
+to the various weather events they wish to record data for.
+
+In the dataset however, almost 1000 unique values exist. An examination
+shows this to have probably resulted from manual data entry. For example:
 
 
 ```r
@@ -126,24 +132,29 @@ df %>%
 ## 7 blizzard and heavy snow            1
 ```
 
-We'd like to know if this is going to be a problem. For what proportion of 
-records are the official designations for `evtype` not followed?
+We can see one value labeling most of the observations, with a number of
+similar-sounding events labeling other observations that should probably be
+a part of `blizzard`. We'd like to know if this is going to be a problem. 
+**For what proportion of records does `evtype` have a non-standard value?**
 
 
 ```r
-types <- tolower(readLines("evtypes.txt")) # a list of official types
+types <- tolower(readLines("evtypes.txt")) # a vector of standard values
 df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 ```
 
 ```
 ## [1] 0.2958472
 ```
-About 30% of the data is using some other designation for `evtype`. This is
-a significant number and could certainly skew our analysis if one large category
-were split into multiple smaller categories.
+About 30% of the data is using some other label for `evtype`. This is
+a significant number and could certainly skew our analysis of the major causes
+of human or financial damage.  e.g. if one large event type
+were split into many smaller types it would no longer appear to be a major
+cause.
 
-Let's count how many `evtype` strings have 100 or more observations in the dataset.
-As a reminder, there are 902297 observations in total.
+Let's count how many non-standard `evtype` strings have 100 or more observations
+in the dataset. As a reminder, there are 902297 observations in total.
+
 
 ```r
 fixtypes <- df %>% 
@@ -159,13 +170,14 @@ length(fixtypes)
 ## [1] 32
 ```
 
-This is good news. We won't have to fix over 900 possible errors, just 32 of
-them, to ensure a much more accurate analysis.
+This is good news, we won't have to fix over 900 possible errors. Fixing 
+the 32 most common should ensure a much more accurate analysis.
 
-What we will do is work through these 32 types systematically and assign them,
-using the documentation PDFs provided as part of the assignment, 
-to correct `evtype`s. The others we will disregard as having too
-small an effect on the analysis to matter. Let's first look at these names.
+What we will do is work through these 32 types systematically and assign them
+the correct `evtype`s, using the NOAA documentation and some common sense. 
+The rest of the non-standard labels we will disregard for having too
+small an effect on the analysis to matter. Let's first look at the labels
+we'll fix.
 
 
 ```r
@@ -186,8 +198,8 @@ fixtypes
 ## [31] "astronomical high tide" "moderate snowfall"
 ```
 
-Now we'll fix these incorrect designations by reassigning them to the
-correct value.
+Now we'll fix these incorrect labels by reassigning the observation to the
+correct `evtype`.
 
 
 ```r
@@ -240,21 +252,18 @@ df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 ## [1] 0.003188529
 ```
 
-Excellent! Only 0.3% of records have some unusual `evtype` from manual data
-entry errors. We'll continue the analysis with this much-improved dataset, 
-assuming that this tiny proportion of error won't skew our results significantly.
-
+Excellent! Now only 0.3% of records have some unusual `evtype` from data
+entry errors. We'll continue the analysis with this imperfect but
+much-improved dataset, 
+assuming that this tiny proportion of error won't significantly skew our results.
 
 ## Results
 *There should be a section titled Results in which your results are presented.*
 
-        
-
 ### Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
 
-**Variables of interest**
 
-Here we sum the fatalities and injuries by `evtype`, select the top ten,
+Here we sum the fatalities and injuries across `evtype`s, select the ten largest,
 and then plot the results.
 
 
@@ -291,7 +300,9 @@ par(mfrow = c(1,1), mar=c(5, 4, 4, 2) + 0.1)
 In terms of both fatalities and injuries, **tornadoes are the most destructive
 events to human health** in this dataset. 
 
-However, knowing something of 
+#### Hurricanes?
+
+There appears to be something missing in the above graphs. Knowing something of 
 destructive US weather events one must ask **"Where are the hurricanes?"**
 
 There is an important note in the FAQ:
@@ -301,7 +312,7 @@ attributed only to wind damage experienced in the coastal counties/parishes list
 tropical cyclone related events such as tornadoes and flooding are listed within their
 separate event types.
 
-**i.e. the deaths caused by hurricanes have deliberately been split up into 
+**i.e. the deaths and damage from hurricanes have deliberately been split up into 
 multiple evtypes** and will show up as part of floods, lightning, wind, etc. 
 Hurricane-spawned tornadoes are also included in the tornado events graphed above.
 From the point of view of this dataset, hurricanes are a sort of 'meta-event'
@@ -312,11 +323,6 @@ It is also worth noting that some similar events have different official
 the graphs above.
 
 ### Across the United States, which types of events have the greatest economic consequences?
-
-**Variables of Interest**
-
-* `evtype`
-* `propdmg`, `cropdmg`, `propdmgexp`, `cropdmgexp`
 
 
 ```r
@@ -342,5 +348,54 @@ df %>%
 ##  9 winter storm          6688497260    26944000
 ## 10 ice storm             3944928310  5022113500
 ## # … with 479 more rows
+```
+
+
+To aid reproducibility, here is the session environment at time of publishing.
+
+```r
+sessionInfo()
+```
+
+```
+## R version 4.1.2 (2021-11-01)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 20.04.3 LTS
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/atlas/libblas.so.3.10.3
+## LAPACK: /usr/lib/x86_64-linux-gnu/atlas/liblapack.so.3.10.3
+## 
+## locale:
+##  [1] LC_CTYPE=en_CA.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_CA.UTF-8        LC_COLLATE=en_CA.UTF-8    
+##  [5] LC_MONETARY=en_CA.UTF-8    LC_MESSAGES=en_CA.UTF-8   
+##  [7] LC_PAPER=en_CA.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_CA.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] lubridate_1.8.0 forcats_0.5.1   stringr_1.4.0   dplyr_1.0.7    
+##  [5] purrr_0.3.4     readr_2.1.1     tidyr_1.1.4     tibble_3.1.6   
+##  [9] ggplot2_3.3.5   tidyverse_1.3.1
+## 
+## loaded via a namespace (and not attached):
+##  [1] tidyselect_1.1.1 xfun_0.29        haven_2.4.3      colorspace_2.0-2
+##  [5] vctrs_0.3.8      generics_0.1.1   htmltools_0.5.2  yaml_2.2.1      
+##  [9] utf8_1.2.2       rlang_0.4.12     jquerylib_0.1.4  pillar_1.6.4    
+## [13] glue_1.6.0       withr_2.4.3      DBI_1.1.2        dbplyr_2.1.1    
+## [17] modelr_0.1.8     readxl_1.3.1     lifecycle_1.0.1  munsell_0.5.0   
+## [21] gtable_0.3.0     cellranger_1.1.0 rvest_1.0.2      evaluate_0.14   
+## [25] knitr_1.37       tzdb_0.2.0       fastmap_1.1.0    fansi_0.5.0     
+## [29] highr_0.9        broom_0.7.10     Rcpp_1.0.7       backports_1.4.1 
+## [33] scales_1.1.1     jsonlite_1.7.2   fs_1.5.2         hms_1.1.1       
+## [37] digest_0.6.29    stringi_1.7.6    grid_4.1.2       cli_3.1.0       
+## [41] tools_4.1.2      magrittr_2.0.1   crayon_1.4.2     pkgconfig_2.0.3 
+## [45] ellipsis_0.3.2   xml2_1.3.3       reprex_2.0.1     rstudioapi_0.13 
+## [49] assertthat_0.2.1 rmarkdown_2.11   httr_1.4.2       R6_2.5.1        
+## [53] compiler_4.1.2
 ```
 
