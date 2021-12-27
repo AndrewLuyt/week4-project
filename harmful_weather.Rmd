@@ -29,6 +29,13 @@ you may consider using the `cache = TRUE` option for certain code chunks.*
 # entire package because its namespace overlaps some other functions we use.
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(lubridate))
+suppressPackageStartupMessages(library(kableExtra))  # table formatting tools
+
+# global table styling options set here by overriding kable()
+kable <- function(data, ...) {
+    knitr::kable(data, ...) %>% 
+        kable_classic(full_width=FALSE, position="left")
+}
 ```
 
 ```{r load-data, cache=TRUE}
@@ -109,7 +116,8 @@ df %>%
     count(evtype) %>% 
     arrange(desc(n)) %>% 
     filter(str_detect(evtype, "blizzard")) %>% 
-    head(n=7)
+    head(n=7) %>% 
+    kable(caption = 'A sample of blizzard-related evtypes')
 ```
 
 We can see one value labeling most of the observations, with a number of
@@ -150,7 +158,7 @@ small an effect on the analysis to matter. Let's first look at the labels
 we'll fix.
 
 ```{r show_types_to_fix}
-fixtypes
+kable(matrix(fixtypes, nrow = 8), caption = "The 32 most important evtypes to correct")
 ```
 
 Now we'll fix these incorrect labels by reassigning the observation to the
@@ -218,13 +226,13 @@ and then plot the results.
 ```{r injuries_fatalities, cache=TRUE}
 top_fatalities <- df %>% 
     group_by(evtype) %>% 
-    summarise(fatalities = sum(fatalities)) %>% 
+    summarise(fatalities = sum(fatalities, na.rm = TRUE)) %>% 
     arrange(desc(fatalities)) %>% 
     slice_head(n = 10)
 
 top_injuries <- df %>% 
     group_by(evtype) %>% 
-    summarise(injuries = sum(injuries)) %>% 
+    summarise(injuries = sum(injuries, na.rm = TRUE)) %>% 
     arrange(desc(injuries)) %>% 
     slice_head(n = 10)
 ```
@@ -270,9 +278,11 @@ the graphs above.
 ```{r calculate_damages}
 df %>% 
     group_by(evtype) %>% 
-    summarise(property = sum(propdmg * propdmgexp),
-              crops = sum(cropdmg * cropdmgexp)) %>% 
-    arrange(desc(property))
+    summarise(property = sum(propdmg * propdmgexp, na.rm = TRUE),
+              crops = sum(cropdmg * cropdmgexp, na.rm = TRUE)) %>% 
+    arrange(desc(property)) %>% 
+    head(10) %>% 
+    kable(caption = "Most damaging events, sorted by property damage")
 ```
 
 

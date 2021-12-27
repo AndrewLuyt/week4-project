@@ -28,6 +28,13 @@ you may consider using the `cache = TRUE` option for certain code chunks.*
 # entire package because its namespace overlaps some other functions we use.
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(lubridate))
+suppressPackageStartupMessages(library(kableExtra))  # table formatting tools
+
+# global table styling options set here by overriding kable()
+kable <- function(data, ...) {
+    knitr::kable(data, ...) %>% 
+        kable_classic(full_width=FALSE, position="left")
+}
 ```
 
 
@@ -116,21 +123,49 @@ df %>%
     count(evtype) %>% 
     arrange(desc(n)) %>% 
     filter(str_detect(evtype, "blizzard")) %>% 
-    head(n=7)
+    head(n=7) %>% 
+    kable(caption = 'A sample of blizzard-related evtypes')
 ```
 
-```
-## # A tibble: 7 × 2
-##   evtype                             n
-##   <chr>                          <int>
-## 1 blizzard                        2719
-## 2 high wind/blizzard                 6
-## 3 heavy snow/blizzard                3
-## 4 blizzard and extreme wind chil     2
-## 5 blizzard/heavy snow                2
-## 6 ground blizzard                    2
-## 7 blizzard and heavy snow            1
-```
+<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<caption>A sample of blizzard-related evtypes</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> evtype </th>
+   <th style="text-align:right;"> n </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> blizzard </td>
+   <td style="text-align:right;"> 2719 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> high wind/blizzard </td>
+   <td style="text-align:right;"> 6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> heavy snow/blizzard </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> blizzard and extreme wind chil </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> blizzard/heavy snow </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> ground blizzard </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> blizzard and heavy snow </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+</tbody>
+</table>
 
 We can see one value labeling most of the observations, with a number of
 similar-sounding events labeling other observations that should probably be
@@ -181,22 +216,62 @@ we'll fix.
 
 
 ```r
-fixtypes
+kable(matrix(fixtypes, nrow = 8), caption = "The 32 most important evtypes to correct")
 ```
 
-```
-##  [1] "tstm wind"              "thunderstorm winds"     "marine tstm wind"      
-##  [4] "urban/sml stream fld"   "high winds"             "wild/forest fire"      
-##  [7] "winter weather/mix"     "tstm wind/hail"         "flash flooding"        
-## [10] "extreme cold"           "flood/flash flood"      "snow"                  
-## [13] "landslide"              "fog"                    "wind"                  
-## [16] "rip currents"           "storm surge"            "freezing rain"         
-## [19] "urban flood"            "heavy surf/high surf"   "extreme windchill"     
-## [22] "strong winds"           "dry microburst"         "coastal flooding"      
-## [25] "light snow"             "hurricane"              "river flood"           
-## [28] "record warmth"          "unseasonably warm"      "flooding"              
-## [31] "astronomical high tide" "moderate snowfall"
-```
+<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<caption>The 32 most important evtypes to correct</caption>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> tstm wind </td>
+   <td style="text-align:left;"> flash flooding </td>
+   <td style="text-align:left;"> storm surge </td>
+   <td style="text-align:left;"> light snow </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> thunderstorm winds </td>
+   <td style="text-align:left;"> extreme cold </td>
+   <td style="text-align:left;"> freezing rain </td>
+   <td style="text-align:left;"> hurricane </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> marine tstm wind </td>
+   <td style="text-align:left;"> flood/flash flood </td>
+   <td style="text-align:left;"> urban flood </td>
+   <td style="text-align:left;"> river flood </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> urban/sml stream fld </td>
+   <td style="text-align:left;"> snow </td>
+   <td style="text-align:left;"> heavy surf/high surf </td>
+   <td style="text-align:left;"> record warmth </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> high winds </td>
+   <td style="text-align:left;"> landslide </td>
+   <td style="text-align:left;"> extreme windchill </td>
+   <td style="text-align:left;"> unseasonably warm </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> wild/forest fire </td>
+   <td style="text-align:left;"> fog </td>
+   <td style="text-align:left;"> strong winds </td>
+   <td style="text-align:left;"> flooding </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> winter weather/mix </td>
+   <td style="text-align:left;"> wind </td>
+   <td style="text-align:left;"> dry microburst </td>
+   <td style="text-align:left;"> astronomical high tide </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tstm wind/hail </td>
+   <td style="text-align:left;"> rip currents </td>
+   <td style="text-align:left;"> coastal flooding </td>
+   <td style="text-align:left;"> moderate snowfall </td>
+  </tr>
+</tbody>
+</table>
 
 Now we'll fix these incorrect labels by reassigning the observation to the
 correct `evtype`.
@@ -270,13 +345,13 @@ and then plot the results.
 ```r
 top_fatalities <- df %>% 
     group_by(evtype) %>% 
-    summarise(fatalities = sum(fatalities)) %>% 
+    summarise(fatalities = sum(fatalities, na.rm = TRUE)) %>% 
     arrange(desc(fatalities)) %>% 
     slice_head(n = 10)
 
 top_injuries <- df %>% 
     group_by(evtype) %>% 
-    summarise(injuries = sum(injuries)) %>% 
+    summarise(injuries = sum(injuries, na.rm = TRUE)) %>% 
     arrange(desc(injuries)) %>% 
     slice_head(n = 10)
 ```
@@ -328,27 +403,75 @@ the graphs above.
 ```r
 df %>% 
     group_by(evtype) %>% 
-    summarise(property = sum(propdmg * propdmgexp),
-              crops = sum(cropdmg * cropdmgexp)) %>% 
-    arrange(desc(property))
+    summarise(property = sum(propdmg * propdmgexp, na.rm = TRUE),
+              crops = sum(cropdmg * cropdmgexp, na.rm = TRUE)) %>% 
+    arrange(desc(property)) %>% 
+    head(10) %>% 
+    kable(caption = "Most damaging events, sorted by property damage")
 ```
 
-```
-## # A tibble: 489 × 3
-##    evtype                  property       crops
-##    <chr>                      <dbl>       <dbl>
-##  1 flood               150751456324 10853820100
-##  2 hurricane (typhoon)  84656180010  5505292800
-##  3 tornado              56937162897   414954710
-##  4 storm surge/tide     47974149000      855000
-##  5 flash flood          16140865011  1421317100
-##  6 hail                 15732269877  3025954650
-##  7 wildfire              7766963500   402281630
-##  8 tropical storm        7703890550   678346000
-##  9 winter storm          6688497260    26944000
-## 10 ice storm             3944928310  5022113500
-## # … with 479 more rows
-```
+<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<caption>Most damaging events, sorted by property damage</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> evtype </th>
+   <th style="text-align:right;"> property </th>
+   <th style="text-align:right;"> crops </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> flood </td>
+   <td style="text-align:right;"> 150751456324 </td>
+   <td style="text-align:right;"> 10853820100 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> hurricane (typhoon) </td>
+   <td style="text-align:right;"> 84656180010 </td>
+   <td style="text-align:right;"> 5505292800 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tornado </td>
+   <td style="text-align:right;"> 56937162897 </td>
+   <td style="text-align:right;"> 414954710 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> storm surge/tide </td>
+   <td style="text-align:right;"> 47974149000 </td>
+   <td style="text-align:right;"> 855000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> thunderstorm wind </td>
+   <td style="text-align:right;"> 17749372097 </td>
+   <td style="text-align:right;"> 2159320250 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> flash flood </td>
+   <td style="text-align:right;"> 16140865011 </td>
+   <td style="text-align:right;"> 1421317100 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> hail </td>
+   <td style="text-align:right;"> 15732269877 </td>
+   <td style="text-align:right;"> 3025954650 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> wildfire </td>
+   <td style="text-align:right;"> 7766963500 </td>
+   <td style="text-align:right;"> 402281630 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tropical storm </td>
+   <td style="text-align:right;"> 7703890550 </td>
+   <td style="text-align:right;"> 678346000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> winter storm </td>
+   <td style="text-align:right;"> 6688497260 </td>
+   <td style="text-align:right;"> 26944000 </td>
+  </tr>
+</tbody>
+</table>
 
 
 To aid reproducibility, here is the session environment at time of publishing.
@@ -378,24 +501,25 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] lubridate_1.8.0 forcats_0.5.1   stringr_1.4.0   dplyr_1.0.7    
-##  [5] purrr_0.3.4     readr_2.1.1     tidyr_1.1.4     tibble_3.1.6   
-##  [9] ggplot2_3.3.5   tidyverse_1.3.1
+##  [1] kableExtra_1.3.4 lubridate_1.8.0  forcats_0.5.1    stringr_1.4.0   
+##  [5] dplyr_1.0.7      purrr_0.3.4      readr_2.1.1      tidyr_1.1.4     
+##  [9] tibble_3.1.6     ggplot2_3.3.5    tidyverse_1.3.1 
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_1.1.1 xfun_0.29        haven_2.4.3      colorspace_2.0-2
-##  [5] vctrs_0.3.8      generics_0.1.1   htmltools_0.5.2  yaml_2.2.1      
-##  [9] utf8_1.2.2       rlang_0.4.12     jquerylib_0.1.4  pillar_1.6.4    
-## [13] glue_1.6.0       withr_2.4.3      DBI_1.1.2        dbplyr_2.1.1    
-## [17] modelr_0.1.8     readxl_1.3.1     lifecycle_1.0.1  munsell_0.5.0   
-## [21] gtable_0.3.0     cellranger_1.1.0 rvest_1.0.2      evaluate_0.14   
-## [25] knitr_1.37       tzdb_0.2.0       fastmap_1.1.0    fansi_0.5.0     
-## [29] highr_0.9        broom_0.7.10     Rcpp_1.0.7       backports_1.4.1 
-## [33] scales_1.1.1     jsonlite_1.7.2   fs_1.5.2         hms_1.1.1       
-## [37] digest_0.6.29    stringi_1.7.6    grid_4.1.2       cli_3.1.0       
-## [41] tools_4.1.2      magrittr_2.0.1   crayon_1.4.2     pkgconfig_2.0.3 
-## [45] ellipsis_0.3.2   xml2_1.3.3       reprex_2.0.1     rstudioapi_0.13 
-## [49] assertthat_0.2.1 rmarkdown_2.11   httr_1.4.2       R6_2.5.1        
-## [53] compiler_4.1.2
+##  [1] tidyselect_1.1.1  xfun_0.29         haven_2.4.3       colorspace_2.0-2 
+##  [5] vctrs_0.3.8       generics_0.1.1    viridisLite_0.4.0 htmltools_0.5.2  
+##  [9] yaml_2.2.1        utf8_1.2.2        rlang_0.4.12      jquerylib_0.1.4  
+## [13] pillar_1.6.4      glue_1.6.0        withr_2.4.3       DBI_1.1.2        
+## [17] dbplyr_2.1.1      modelr_0.1.8      readxl_1.3.1      lifecycle_1.0.1  
+## [21] munsell_0.5.0     gtable_0.3.0      cellranger_1.1.0  rvest_1.0.2      
+## [25] evaluate_0.14     knitr_1.37        tzdb_0.2.0        fastmap_1.1.0    
+## [29] fansi_0.5.0       highr_0.9         broom_0.7.10      Rcpp_1.0.7       
+## [33] backports_1.4.1   scales_1.1.1      webshot_0.5.2     jsonlite_1.7.2   
+## [37] systemfonts_1.0.3 fs_1.5.2          hms_1.1.1         digest_0.6.29    
+## [41] stringi_1.7.6     grid_4.1.2        cli_3.1.0         tools_4.1.2      
+## [45] magrittr_2.0.1    crayon_1.4.2      pkgconfig_2.0.3   ellipsis_0.3.2   
+## [49] xml2_1.3.3        reprex_2.0.1      svglite_2.0.0     rstudioapi_0.13  
+## [53] assertthat_0.2.1  rmarkdown_2.11    httr_1.4.2        R6_2.5.1         
+## [57] compiler_4.1.2
 ```
 
