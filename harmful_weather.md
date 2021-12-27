@@ -358,7 +358,7 @@ top_injuries <- df %>%
 
 
 ```r
-par(mfrow = c(1,2), mar=c(c(9, 4, 4, 2) + 0.1))
+par(mfrow = c(1,2), mar=c(c(8, 4, 4, 2) + 0.1), cex.axis=.9)
 
 barplot(top_fatalities$fatalities, names.arg = top_fatalities$evtype, las=2,
         main="Fatalities: top causes")
@@ -367,10 +367,6 @@ barplot(top_injuries$injuries, names.arg = top_injuries$evtype, las=2,
 ```
 
 ![](harmful_weather_files/figure-html/graph_injuries_fatalities-1.png)<!-- -->
-
-```r
-par(mfrow = c(1,1), mar=c(5, 4, 4, 2) + 0.1)
-```
 
 In terms of both fatalities and injuries, **tornadoes are the most destructive
 events to human health** in this dataset. 
@@ -401,79 +397,31 @@ the graphs above.
 
 
 ```r
-df %>% 
+top_property_dmg <- df %>% 
     group_by(evtype) %>% 
-    summarise(property = sum(propdmg * propdmgexp, na.rm = TRUE),
-              crops = sum(cropdmg * cropdmgexp, na.rm = TRUE)) %>% 
+    summarise(property = sum(propdmg * propdmgexp, na.rm = TRUE)) %>% 
     arrange(desc(property)) %>% 
-    head(10) %>% 
-    kable(caption = "Most damaging events, sorted by property damage")
+    head(10)
+top_crop_dmg <- df %>% 
+    group_by(evtype) %>% 
+    summarise(crop = sum(cropdmg * cropdmgexp, na.rm = TRUE)) %>% 
+    arrange(desc(crop)) %>% 
+    head(10)
+
+par(mfrow=c(1,2), mar=c(c(9, 5, 4, 2) + 0.1), cex.axis=.9, mgp = c(4, 1, 0))
+barplot(top_property_dmg$property, names.arg = top_property_dmg$evtype, las=2,
+        main="Property damage: top causes", ylab = "US Dollars")
+barplot(top_crop_dmg$crop, names.arg = top_crop_dmg$evtype, las=2,
+        main="Crop damage: top causes")
 ```
 
-<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
-<caption>Most damaging events, sorted by property damage</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;"> evtype </th>
-   <th style="text-align:right;"> property </th>
-   <th style="text-align:right;"> crops </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> flood </td>
-   <td style="text-align:right;"> 150751456324 </td>
-   <td style="text-align:right;"> 10853820100 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> hurricane (typhoon) </td>
-   <td style="text-align:right;"> 84656180010 </td>
-   <td style="text-align:right;"> 5505292800 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> tornado </td>
-   <td style="text-align:right;"> 56937162897 </td>
-   <td style="text-align:right;"> 414954710 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> storm surge/tide </td>
-   <td style="text-align:right;"> 47974149000 </td>
-   <td style="text-align:right;"> 855000 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> thunderstorm wind </td>
-   <td style="text-align:right;"> 17749372097 </td>
-   <td style="text-align:right;"> 2159320250 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> flash flood </td>
-   <td style="text-align:right;"> 16140865011 </td>
-   <td style="text-align:right;"> 1421317100 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> hail </td>
-   <td style="text-align:right;"> 15732269877 </td>
-   <td style="text-align:right;"> 3025954650 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> wildfire </td>
-   <td style="text-align:right;"> 7766963500 </td>
-   <td style="text-align:right;"> 402281630 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> tropical storm </td>
-   <td style="text-align:right;"> 7703890550 </td>
-   <td style="text-align:right;"> 678346000 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> winter storm </td>
-   <td style="text-align:right;"> 6688497260 </td>
-   <td style="text-align:right;"> 26944000 </td>
-  </tr>
-</tbody>
-</table>
+![](harmful_weather_files/figure-html/calculate_damages-1.png)<!-- -->
 
+As mentioned earlier, the amounts for **hurricane (typhoon)** are **only** for
+wind damage on coastal communities.
 
+<br/>
+<hr />
 To aid reproducibility, here is the session environment at time of publishing.
 
 ```r

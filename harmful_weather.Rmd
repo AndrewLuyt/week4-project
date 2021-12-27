@@ -238,14 +238,12 @@ top_injuries <- df %>%
 ```
 
 ```{r graph_injuries_fatalities, fig.height=5, fig.width=7}
-par(mfrow = c(1,2), mar=c(c(9, 4, 4, 2) + 0.1))
+par(mfrow = c(1,2), mar=c(c(8, 4, 4, 2) + 0.1), cex.axis=.9)
 
 barplot(top_fatalities$fatalities, names.arg = top_fatalities$evtype, las=2,
         main="Fatalities: top causes")
 barplot(top_injuries$injuries, names.arg = top_injuries$evtype, las=2,
         main="Injuries: top causes")
-
-par(mfrow = c(1,1), mar=c(5, 4, 4, 2) + 0.1)
 ```
 
 In terms of both fatalities and injuries, **tornadoes are the most destructive
@@ -275,17 +273,30 @@ the graphs above.
 
 ### Across the United States, which types of events have the greatest economic consequences?
 
-```{r calculate_damages}
-df %>% 
+```{r calculate_damages, fig.height=5, fig.width=7}
+top_property_dmg <- df %>% 
     group_by(evtype) %>% 
-    summarise(property = sum(propdmg * propdmgexp, na.rm = TRUE),
-              crops = sum(cropdmg * cropdmgexp, na.rm = TRUE)) %>% 
+    summarise(property = sum(propdmg * propdmgexp, na.rm = TRUE)) %>% 
     arrange(desc(property)) %>% 
-    head(10) %>% 
-    kable(caption = "Most damaging events, sorted by property damage")
+    head(10)
+top_crop_dmg <- df %>% 
+    group_by(evtype) %>% 
+    summarise(crop = sum(cropdmg * cropdmgexp, na.rm = TRUE)) %>% 
+    arrange(desc(crop)) %>% 
+    head(10)
+
+par(mfrow=c(1,2), mar=c(c(9, 5, 4, 2) + 0.1), cex.axis=.9, mgp = c(4, 1, 0))
+barplot(top_property_dmg$property, names.arg = top_property_dmg$evtype, las=2,
+        main="Property damage: top causes", ylab = "US Dollars")
+barplot(top_crop_dmg$crop, names.arg = top_crop_dmg$evtype, las=2,
+        main="Crop damage: top causes")
 ```
 
+As mentioned earlier, the amounts for **hurricane (typhoon)** are **only** for
+wind damage on coastal communities.
 
+<br/>
+<hr />
 To aid reproducibility, here is the session environment at time of publishing.
 ```{r}
 sessionInfo()
