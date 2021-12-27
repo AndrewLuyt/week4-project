@@ -65,10 +65,10 @@ assigned to replace each of these symbols.
 * `empty string`: 0
 * `+` or `?`: 1
 * `0-9`: 10
-* `hH`: 100     "hundred"
-* `kK`: 1000    "kilo"
-* `mM`: $10^6$   "million"
-* `bB`: $10^9$  "billion"
+* `hH`: 100   "hundred"
+* `kK`: 1000  "kilo"
+* `mM`: 10^6  "million"
+* `bB`: 10^9  "billion"
 * `-`: NA 
 
 ```{r correct_exponent_features, cache=TRUE}
