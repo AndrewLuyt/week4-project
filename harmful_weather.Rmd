@@ -4,6 +4,7 @@ author: "Andrew Luyt"
 output: 
     html_document:
         theme: united
+        highlight: pygments
         keep_md: true
 ---
 
@@ -47,10 +48,10 @@ df$evtype <- tolower(str_squish(df$evtype))
 Damage amounts are represented in an unusual way. They are expressed in
 scientific notation, with the base and exponent stored in separate variables.
 
-The exponents,
-`propdmgexp` and `cropdmgexp`, contain unusual values. They are supposed to
+The exponents, `propdmgexp` and `cropdmgexp`,  are supposed to
 represent a power of 10, which is multiplied by `propdmg` or `cropdmg`
-respectively to express a final damage amount.
+respectively to express a final damage amount. However, they actually
+contain unusual values:
 
 ```{r check_exponent_features}
 sort(union(unique(df$propdmgexp), unique(df$cropdmgexp)))
@@ -59,7 +60,7 @@ sort(union(unique(df$propdmgexp), unique(df$cropdmgexp)))
 After some investigation, it appears varying data entry standards or data
 entry error has resulted in this state of affairs. A power of 10 will be
 assigned to replace each of these symbols.
-(*For a more complete discussion, see [this Rpubs document](https://rstudio-pubs-static.s3.amazonaws.com/58957_37b6723ee52b455990e149edde45e5b6.html).*)
+[*For a more complete discussion, see [this Rpubs document](https://rstudio-pubs-static.s3.amazonaws.com/58957_37b6723ee52b455990e149edde45e5b6.html).*]
 
 * `empty string`: 0
 * `+` or `?`: 1
@@ -67,7 +68,7 @@ assigned to replace each of these symbols.
 * `hH`: 100     "hundred"
 * `kK`: 1000    "kilo"
 * `mM`: $10^6$   "million"
-* `bB`: $10^9$  "billion
+* `bB`: $10^9$  "billion"
 * `-`: NA 
 
 ```{r correct_exponent_features, cache=TRUE}
@@ -87,10 +88,110 @@ for (i in 1:length(old)) {
 
 df$cropdmgexp <- cnew
 df$propdmgexp <- pnew
-rm(ctmp, ptmp, cnew, pnew)
+rm(ctmp, ptmp, cnew, pnew, old, new, i)
 
 ```
 
+### Fixing `evtype`
+
+In the documentation there are 48 official allowable `evtype` values.
+In the dataset however, almost 1000 unique values exist. An examination of
+these shows this to have resulted from manual data entry. For example:
+
+```{r demonstrate_data_entry_problems}
+df %>% 
+    count(evtype) %>% 
+    arrange(desc(n)) %>% 
+    filter(str_detect(evtype, "blizzard")) %>% 
+    head(n=7)
+```
+
+We'd like to know if this is going to be a problem. For what proportion of 
+records are the official designations for `evtype` not followed?
+
+```{r find_proportion_of_bad_types}
+types <- tolower(readLines("evtypes.txt")) # a list of official types
+df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
+```
+About 30% of the data is using some other designation for `evtype`. This is
+a significant number and could certainly skew our analysis if one large category
+were split into multiple smaller categories.
+
+Let's count how many `evtype` strings have 100 or more observations in the dataset.
+As a reminder, there are `r nrow(df)` observations in total.
+```{r count_types_to_fix_manually}
+fixtypes <- df %>% 
+    filter(! evtype %in% types) %>%
+    count(evtype) %>% 
+    arrange(desc(n)) %>% 
+    filter(n >= 100) %>% 
+    pull(evtype)
+length(fixtypes)
+```
+
+This is good news. We won't have to fix over 900 possible errors, just 32 of
+them, to ensure a much more accurate analysis.
+
+What we will do is work through these 32 types systematically and assign them,
+using the documentation PDFs provided as part of the assignment, 
+to correct `evtype`s. The others we will disregard as having too
+small an effect on the analysis to matter. Let's first look at these names.
+
+```{r show_types_to_fix}
+fixtypes
+```
+
+Now we'll fix these incorrect designations by reassigning them to the
+correct value.
+
+```{r create_types_fixlist}
+# map official evtypes to a vector of some incorrect names for that type
+fixlist <- list(
+    "thunderstorm wind" = c("tstm wind", "thunderstorm winds", "tstm wind/hail", 
+                            "wind", "dry microburst"),
+    "marine thunderstorm wind" = c("marine tstm wind"),
+    "flood" = c("urban/sml stream fld", "flood/flash flood", "urban flood",
+                "river flood", "flooding"),
+    "flash flood" = c("flash flooding"),
+    "coastal flood" = c("coastal flooding"),
+    "high wind" = c("high winds"),
+    "strong wind" = c("strong winds"),
+    "wildfire" = c("wild/forest fire"),
+    "winter weather" = c("winter weather/mix"),
+    "extreme cold/wind chill" = c("extreme cold", "extreme windchill"),
+    "heavy snow" = c("snow", "light snow", "moderate snowfall"),
+    "debris flow" = c("landslide"),
+    "dense fog" = c("fog"),
+    "rip current" = c("rip currents"),
+    "excessive heat" = c("unseasonably warm", "record warmth"),
+    # from docs: "..caused by any combination of...high astronomical tide..."
+    "storm surge/tide" = c("storm surge", "astronomical high tide"),  
+    "high surf" = c("heavy surf/high surf"),
+    "winter weather" = c("freezing rain"),
+    "hurricane (typhoon)" = c("hurricane")
+)
+
+tmp <- df$evtype
+
+# replace all the bad evtypes with official evtypes
+for (officialtype in names(fixlist)) {
+    for (badtype in fixlist[[officialtype]]) {
+        tmp[grep(pattern = badtype, x = tmp)] <- officialtype
+    }
+}
+df$evtype <- tmp
+rm(tmp)
+```
+
+Previously, almost 30% of records had an incorrect `evtype`. Let's recalculate 
+that proportion.
+```{r how_effective_was_fixing_names}
+df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
+```
+
+Excellent! Only 0.3% of records have some unusual `evtype` from manual data
+entry errors. We'll continue the analysis with this much-improved dataset, 
+assuming that this tiny proportion of error won't skew our results significantly.
 
 
 ## Results
@@ -102,9 +203,8 @@ rm(ctmp, ptmp, cnew, pnew)
 
 **Variables of interest**
 
-* `evtype`
-* `fatalities` and `injuries`
-
+Here we sum the fatalities and injuries by `evtype`, select the top ten,
+and then plot the results.
 
 ```{r injuries_fatalities, cache=TRUE}
 top_fatalities <- df %>% 
@@ -124,9 +224,9 @@ top_injuries <- df %>%
 par(mfrow = c(1,2), mar=c(c(9, 4, 4, 2) + 0.1))
 
 barplot(top_fatalities$fatalities, names.arg = top_fatalities$evtype, las=2,
-        main="Fatalities")
+        main="Fatalities: top causes")
 barplot(top_injuries$injuries, names.arg = top_injuries$evtype, las=2,
-        main="Injuries")
+        main="Injuries: top causes")
 
 par(mfrow = c(1,1), mar=c(5, 4, 4, 2) + 0.1)
 ```
@@ -135,7 +235,7 @@ In terms of both fatalities and injuries, **tornadoes are the most destructive
 events to human health** in this dataset. 
 
 However, knowing something of 
-destructive US weather events, one must ask **"Where are the hurricanes?"**
+destructive US weather events one must ask **"Where are the hurricanes?"**
 
 There is an important note in the FAQ:
 
@@ -144,9 +244,15 @@ attributed only to wind damage experienced in the coastal counties/parishes list
 tropical cyclone related events such as tornadoes and flooding are listed within their
 separate event types.
 
-**i.e. the deaths caused by hurricanes are split up into multiple evtypes**
-and will show up as part of floods, lightning, wind, etc. Hurricane-spawned
-tornadoes are also included in the tornado events graphed above.
+**i.e. the deaths caused by hurricanes have deliberately been split up into 
+multiple evtypes** and will show up as part of floods, lightning, wind, etc. 
+Hurricane-spawned tornadoes are also included in the tornado events graphed above.
+From the point of view of this dataset, hurricanes are a sort of 'meta-event'
+that **causes** other events.
+
+It is also worth noting that some similar events have different official
+`evtype`s, e.g. **excessive heat** and **heat**, both of which show up in
+the graphs above.
 
 ### Across the United States, which types of events have the greatest economic consequences?
 
@@ -154,3 +260,12 @@ tornadoes are also included in the tornado events graphed above.
 
 * `evtype`
 * `propdmg`, `cropdmg`, `propdmgexp`, `cropdmgexp`
+
+```{r calculate_damages}
+df %>% 
+    group_by(evtype) %>% 
+    summarise(property = sum(propdmg * propdmgexp),
+              crops = sum(cropdmg * cropdmgexp)) %>% 
+    arrange(desc(property))
+```
+
