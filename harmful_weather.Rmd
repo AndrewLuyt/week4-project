@@ -18,14 +18,10 @@ knitr::opts_chunk$set(echo = TRUE)
 summarizes your analysis in at most 10 complete sentences.*
 
 ## Data Processing
-*There should be a section titled Data Processing which describes (in words and 
-code) how the data were loaded into R and processed for analysis. In particular, 
-your analysis must start from the raw CSV file containing the data. You cannot 
-do any preprocessing outside the document. If preprocessing is time-consuming 
-you may consider using the `cache = TRUE` option for certain code chunks.*
 
+We'll load libraries first and 
 ```{r libraries}
-# data.table is required for one function only, "fread". We won't load the
+# One function from data.table is also required, "fread". We won't load the
 # entire package because its namespace overlaps some other functions we use.
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(lubridate))
@@ -38,6 +34,9 @@ kable <- function(data, ...) {
 }
 ```
 
+Next we load the data, rename two variables with cumbersome names,
+remove two variables, and standardize the values of `evtype` to lowercase
+with no extra spaces.
 ```{r load-data, cache=TRUE}
 df <- as_tibble(data.table::fread(file = "repdata_data_StormData.csv.bz2"))
 df <- rename(df, state_num = STATE__, longitude_e = LONGITUDE_)
@@ -101,15 +100,18 @@ rm(ctmp, ptmp, cnew, pnew, old, new, i)
 
 ### Fixing `evtype`
 
-`evtype` may be the most important variable in our dataset. Later we'll be
-aggregating human and financial damage via the values in `evtype` and it's
-important that they reflect what we think they do.
+`evtype` may be the most important variable in our dataset. It is the
+variable that categorizes each event as "tornado", "flood" and so forth.
+Later we'll use `evtype` to
+aggregate human and financial damage for each type of weather event and it's
+important that they reflect the categories we think they do.
 
 In the NOAA documentation there are 48 official `evtype` values, corresponding
 to the various weather events they wish to record data for.
 
 In the dataset however, almost 1000 unique values exist. An examination
-shows this to have probably resulted from manual data entry. For example:
+shows this to have probably resulted from manual data entry. For example,
+here we list types relating to blizzards.
 
 ```{r demonstrate_data_entry_problems}
 df %>% 
@@ -120,22 +122,26 @@ df %>%
     kable(caption = 'A sample of blizzard-related evtypes')
 ```
 
-We can see one value labeling most of the observations, with a number of
-similar-sounding events labeling other observations that should probably be
-a part of `blizzard`. We'd like to know if this is going to be a problem. 
-**For what proportion of records does `evtype` have a non-standard value?**
+We can see that `"blizzard"` labels most of the observations, with a small number of
+other observations given similar-sounding labels. These observations should probably be
+a part of `"blizzard"`. With over 1000 types in the dataset, We'd like to know 
+if this example represents a systematic problem. 
+
+We constructed a list of official evtypes from NOAA documentation and
+stored it in `evtypes.txt`. We wish to know
+**what proportion of records have a non-standard `evtype` value?**
 
 ```{r find_proportion_of_bad_types}
 types <- tolower(readLines("evtypes.txt")) # a vector of standard values
 df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 ```
 About 30% of the data is using some other label for `evtype`. This is
-a significant number and could certainly skew our analysis of the major causes
-of human or financial damage.  e.g. if one large event type
-were split into many smaller types it would no longer appear to be a major
-cause.
+a significant number and could certainly skew our analysis.
+e.g. if one major event type
+were split into many smaller types it might no longer appear to be a major
+cause of damage.
 
-Let's count how many non-standard `evtype` strings have 100 or more observations
+Let's count how many non-standard `evtype` strings label 100 or more observations
 in the dataset. As a reminder, there are `r nrow(df)` observations in total.
 
 ```{r count_types_to_fix_manually}
@@ -152,7 +158,7 @@ This is good news, we won't have to fix over 900 possible errors. Fixing
 the 32 most common should ensure a much more accurate analysis.
 
 What we will do is work through these 32 types systematically and assign them
-the correct `evtype`s, using the NOAA documentation and some common sense. 
+the correct `evtype`, using the NOAA documentation and some common sense. 
 The rest of the non-standard labels we will disregard for having too
 small an effect on the analysis to matter. Let's first look at the labels
 we'll fix.
@@ -210,18 +216,26 @@ df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 ```
 
 Excellent! Now only 0.3% of records have some unusual `evtype` from data
-entry errors. We'll continue the analysis with this imperfect but
+entry errors. Let's make one more test. It's *possible* these small number of
+observations are actually large in terms of human or financial damage. Let us
+compare the sum of fatalities, injuries, property damage, and crop damage of these
+remaining records to the rest of the dataset.
+
+```{r}
+
+```
+
+We'll continue the analysis with this imperfect but
 much-improved dataset, 
 assuming that this tiny proportion of error won't significantly skew our results.
 
 ## Results
-*There should be a section titled Results in which your results are presented.*
 
-### Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+#### Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
 
 
-Here we sum the fatalities and injuries across `evtype`s, select the ten largest,
-and then plot the results.
+Here we sum the fatalities and injuries across `evtype`s, select the ten largest
+sums, and then plot the results.
 
 ```{r injuries_fatalities, cache=TRUE}
 top_fatalities <- df %>% 
@@ -262,16 +276,18 @@ tropical cyclone related events such as tornadoes and flooding are listed within
 separate event types.
 
 **i.e. the deaths and damage from hurricanes have deliberately been split up into 
-multiple evtypes** and will show up as part of floods, lightning, wind, etc. 
+multiple evtypes** and will show up as part of floods, lightning, wind, *etc.*
 Hurricane-spawned tornadoes are also included in the tornado events graphed above.
-From the point of view of this dataset, hurricanes are a sort of 'meta-event'
-that **causes** other events.
+From the point of view of this dataset, hurricanes may be understood as a
+'meta-event' that *causes* other events.
 
 It is also worth noting that some similar events have different official
-`evtype`s, e.g. **excessive heat** and **heat**, both of which show up in
+`evtype`s, e.g. `excessive heat` and `heat` both of which show up in
 the graphs above.
 
-### Across the United States, which types of events have the greatest economic consequences?
+#### Across the United States, which types of events have the greatest economic consequences?
+
+We proceed as earlier, summing property and crop damage across all evtypes.
 
 ```{r calculate_damages, fig.height=5, fig.width=7}
 top_property_dmg <- df %>% 
@@ -292,8 +308,9 @@ barplot(top_crop_dmg$crop, names.arg = top_crop_dmg$evtype, las=2,
         main="Crop damage: top causes")
 ```
 
-As mentioned earlier, the amounts for **hurricane (typhoon)** are **only** for
-wind damage on coastal communities.
+As mentioned in the previous section, the amounts for **hurricane (typhoon)** 
+are **only** for wind damage on coastal communities. Hurricane-caused flooding,
+*etc.* are grouped into separate `evtypes`.
 
 <br/>
 <hr />

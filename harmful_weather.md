@@ -16,11 +16,6 @@ output:
 summarizes your analysis in at most 10 complete sentences.*
 
 ## Data Processing
-*There should be a section titled Data Processing which describes (in words and 
-code) how the data were loaded into R and processed for analysis. In particular, 
-your analysis must start from the raw CSV file containing the data. You cannot 
-do any preprocessing outside the document. If preprocessing is time-consuming 
-you may consider using the `cache = TRUE` option for certain code chunks.*
 
 
 ```r
@@ -333,13 +328,12 @@ much-improved dataset,
 assuming that this tiny proportion of error won't significantly skew our results.
 
 ## Results
-*There should be a section titled Results in which your results are presented.*
 
-### Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+#### Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
 
 
-Here we sum the fatalities and injuries across `evtype`s, select the ten largest,
-and then plot the results.
+Here we sum the fatalities and injuries across `evtype`s, select the ten largest
+sums, and then plot the results.
 
 
 ```r
@@ -384,16 +378,18 @@ tropical cyclone related events such as tornadoes and flooding are listed within
 separate event types.
 
 **i.e. the deaths and damage from hurricanes have deliberately been split up into 
-multiple evtypes** and will show up as part of floods, lightning, wind, etc. 
+multiple evtypes** and will show up as part of floods, lightning, wind, *etc.*
 Hurricane-spawned tornadoes are also included in the tornado events graphed above.
-From the point of view of this dataset, hurricanes are a sort of 'meta-event'
-that **causes** other events.
+From the point of view of this dataset, hurricanes may be understood as a
+'meta-event' that *causes* other events.
 
 It is also worth noting that some similar events have different official
-`evtype`s, e.g. **excessive heat** and **heat**, both of which show up in
+`evtype`s, e.g. `excessive heat` and `heat` both of which show up in
 the graphs above.
 
-### Across the United States, which types of events have the greatest economic consequences?
+#### Across the United States, which types of events have the greatest economic consequences?
+
+We proceed as earlier, summing property and crop damage across all evtypes.
 
 
 ```r
@@ -417,8 +413,9 @@ barplot(top_crop_dmg$crop, names.arg = top_crop_dmg$evtype, las=2,
 
 ![](harmful_weather_files/figure-html/calculate_damages-1.png)<!-- -->
 
-As mentioned earlier, the amounts for **hurricane (typhoon)** are **only** for
-wind damage on coastal communities.
+As mentioned in the previous section, the amounts for **hurricane (typhoon)** 
+are **only** for wind damage on coastal communities. Hurricane-caused flooding,
+*etc.* are grouped into separate `evtypes`.
 
 <br/>
 <hr />
