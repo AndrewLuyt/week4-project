@@ -29,7 +29,7 @@ suppressPackageStartupMessages(library(kableExtra))  # table formatting tools
 
 # global table styling options set here by overriding kable()
 kable <- function(data, ...) {
-    knitr::kable(data, ...) %>% 
+    knitr::kable(data, format.args = list(big.mark = ","), ...) %>% 
         kable_classic(full_width=FALSE, position="left")
 }
 ```
@@ -219,22 +219,35 @@ Excellent! Now only 0.3% of records have some unusual `evtype` from data
 entry errors. Let's make one more test. It's *possible* these small number of
 observations are actually large in terms of human or financial damage. Let us
 compare the sum of fatalities, injuries, property damage, and crop damage of these
-remaining records to the rest of the dataset.
+remaining records to the whole.
 
-```{r}
-
+```{r check_nonstandard_sums}
+results <- df %>% 
+    mutate(property = propdmg*propdmgexp, crops = cropdmg*cropdmgexp) %>% 
+    group_by("standard_evtypes" = evtype %in% types) %>% 
+    summarise(across(c(fatalities, injuries, property, crops),
+                     ~sum(., na.rm=TRUE))) %>% 
+    t()
+results <- results[-1, ]
+colnames(results) <- c("sum.non.standard", "sum.standard")
+as_tibble(results) %>% 
+    mutate(non.standard.proportion = sum.non.standard / (sum.non.standard + sum.standard),
+           class = rownames(results)) %>% 
+    select(class, everything()) %>% 
+    kable()
 ```
 
-We'll continue the analysis with this imperfect but
-much-improved dataset, 
-assuming that this tiny proportion of error won't significantly skew our results.
+With these non-standard cases making up at most 3.3% of their total, the dataset
+is in much better condition than it was in raw form.
+We'll continue the analysis with this imperfect but much-improved dataset, 
+assuming that this small proportion of error won't significantly skew our results.
 
 ## Results
 
 #### Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
 
 
-Here we sum the fatalities and injuries across `evtype`s, select the ten largest
+Here we sum the fatalities and injuries across `evtype`, select the ten largest
 sums, and then plot the results.
 
 ```{r injuries_fatalities, cache=TRUE}
@@ -253,7 +266,6 @@ top_injuries <- df %>%
 
 ```{r graph_injuries_fatalities, fig.height=5, fig.width=7}
 par(mfrow = c(1,2), mar=c(c(8, 4, 4, 2) + 0.1), cex.axis=.9)
-
 barplot(top_fatalities$fatalities, names.arg = top_fatalities$evtype, las=2,
         main="Fatalities: top causes")
 barplot(top_injuries$injuries, names.arg = top_injuries$evtype, las=2,
@@ -282,8 +294,9 @@ From the point of view of this dataset, hurricanes may be understood as a
 'meta-event' that *causes* other events.
 
 It is also worth noting that some similar events have different official
-`evtype`s, e.g. `excessive heat` and `heat` both of which show up in
-the graphs above.
+`evtype`s, e.g. `excessive heat` and `heat`, both of which show up in
+the graphs above.  We will leave this as is, having verified that they
+represent different categories in the NOAA documentation.
 
 #### Across the United States, which types of events have the greatest economic consequences?
 
@@ -294,12 +307,12 @@ top_property_dmg <- df %>%
     group_by(evtype) %>% 
     summarise(property = sum(propdmg * propdmgexp, na.rm = TRUE)) %>% 
     arrange(desc(property)) %>% 
-    head(10)
+    slice_head(n = 10)
 top_crop_dmg <- df %>% 
     group_by(evtype) %>% 
     summarise(crop = sum(cropdmg * cropdmgexp, na.rm = TRUE)) %>% 
     arrange(desc(crop)) %>% 
-    head(10)
+    slice_head(n = 10)
 
 par(mfrow=c(1,2), mar=c(c(9, 5, 4, 2) + 0.1), cex.axis=.9, mgp = c(4, 1, 0))
 barplot(top_property_dmg$property, names.arg = top_property_dmg$evtype, las=2,
