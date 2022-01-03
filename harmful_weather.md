@@ -13,8 +13,18 @@ output:
 *Most recent update: 2022-01-03*
 
 # Synopsis
-*Immediately after the title, there should be a synopsis which describes and 
-summarizes your analysis in at most 10 complete sentences.*
+
+In this analysis we will report on the top weather-related causes of human death & injury
+and property & crop damage. To calculate these sums we will use the NOAA's data
+set of weather events and associated damage for events between
+1950 and November 2011. We spend substantial effort correcting manual data
+entry inconsistencies in the `evtype` variable, and note that damage caused
+by hurricanes is split up into multiple categories, for instance flood and hail.
+
+We find the most damaging weather event to human health is the tornado, and
+the most damaging weather events to property and crops are flooding and
+droughts, respectively.
+
 
 # Data Processing
 
@@ -34,9 +44,13 @@ kable <- function(data, ...) {
 }
 ```
 
-Next we load the data, rename two variables with cumbersome names,
-remove two variables which contain no informatin, and standardize the values 
-of `evtype` to lowercase with no extra spaces.
+Next we load the data and perform some basic data cleaning:
+
+* rename two variables with cumbersome names
+* remove two variables which contain no information
+  * `county_end` and `countyendn` are all 0 and NA, respectively.
+* standardize the values of `evtype` to lowercase with no extra spaces.
+  * to correct some probable manual data entry errors
 
 
 ```r
@@ -110,7 +124,7 @@ rm(ctmp, ptmp, cnew, pnew, old, new, i)
 ## Fixing `evtype`
 
 `evtype` may be the most important variable in our dataset. It is the
-variable that categorizes each event as "tornado", "flood" and so forth.
+variable that categorizes each event as `tornado`, `flood` and so forth.
 Later we'll use `evtype` to
 aggregate human and financial damage for each type of weather event and it's
 important that they reflect the categories we think they do.
@@ -119,7 +133,7 @@ In the NOAA documentation there are 48 official `evtype` values, corresponding
 to the various weather events they wish to record data for.
 
 In the dataset however, 883 unique values exist
-after standardizing to lowercase. An examination of the values
+after standardizing to lowercase and removing extra whitespace. An examination of the values
 shows this to have probably resulted from manual data entry. For example,
 here we list types relating to blizzards.
 
@@ -196,18 +210,18 @@ df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 **About 30% of the data is using some other label for `evtype`.** This is
 a significant number and could certainly skew our analysis.
 e.g. if one major event type
-were split into many smaller types it might no longer appear to be a major
-cause of damage.
-
-What we don't know yet is how these 30% of records are distributed among 
-non-standard `evtypes`.  i.e. Are they evenly distributed amongst the thousand
-or so values (a worst-case scenario) or do a small number of strings
-represent the majority of these problematic observations?
+were split into many smaller types because of typos, it might no longer appear
+to be a major cause of damage.
 
 ### How many non-standard `evtypes` do we need to fix?
 
-We'll next group non-standard observations by their `evtype` and count the
-observations by type. We'll also sort these counts and calculate a cumulative
+What we don't know yet is how these 30% of records are distributed among 
+non-standard `evtypes`.  i.e. Are they evenly distributed amongst the 800
+or so incorrect `evtypes` (a worst-case scenario) or do a small number of strings
+represent the majority of these problematic observations?
+
+We'll group non-standard observations by their `evtype` and count the
+observations. We'll also sort these counts and calculate a cumulative
 proportion of the observations.
 
 
@@ -338,12 +352,12 @@ abline(h=1, lty=2, col='dodgerblue2', lwd=2.5)
 Fixing `tstm wind` alone will correct over 80% of the records, and then
 we see rapidly diminishing returns.
 
-Since evtype errors represent about 30% of all data, correcting these errors
+Since evtype errors represent about 30% of all records, correcting these errors
 to about 98.4% accuracy (the top 32 errors) will result in an overall `evtype`
 accuracy of about `(1 - 0.3 * (1 - .984)) * 100 ~= ` 
 99.5% for the entire dataset. Improving
 further would represent vastly dimished returns, so we'll consider this
-an acceptable improvement from about 70% correct.
+an acceptable improvement over the original data at about 70% correct.
 
 ### Fixing the selected `evtypes`
 
@@ -477,7 +491,9 @@ we estimated we'd see 99.5% correct, so this is reasonable.
 Let's make one more test. It's *possible* these small number of 
 observations are actually large in terms of human or financial damage. Let us
 compare the sum of fatalities, injuries, property damage, and crop damage of the
-remaining uncorrected records to the whole.
+remaining uncorrected records to the whole. If our suppositions are correct,
+the records with non-standard `evtypes` will be only a small percentage of the total
+amounts of damage, etc.
 
 
 ```r
@@ -539,9 +555,9 @@ is in much better condition than it was in raw form.
 We'll continue the analysis with this imperfect but much-improved dataset, 
 assuming that this small proportion of error won't significantly skew our results.
 
-## Results
+# Results
 
-### Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+## Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
 
 
 Here we sum the fatalities and injuries across `evtype`, select the ten largest
@@ -764,7 +780,7 @@ kable(list(data.frame(rank = 1:10), top_fatalities, data.frame(),data.frame(), t
 </table>
 
 
-#### Hurricanes?
+### Hurricanes?
 
 There appears to be something missing in the above graphs. Knowing something of 
 destructive US weather events one must ask **"Where are the hurricanes?"**
@@ -784,10 +800,10 @@ From the point of view of this dataset, hurricanes may be understood as a
 
 It is also worth noting that some similar events have different official
 `evtypes`, e.g. `excessive heat` and `heat`, both of which show up in
-the graphs above.  We will leave this as is, having verified that they
-represent different categories in the NOAA documentation.
+the graphs above.  *We will leave this as is, having verified that they
+represent seperate categories in the NOAA documentation.*
 
-#### Across the United States, which types of events have the greatest economic consequences?
+## Across the United States, which types of events have the greatest economic consequences?
 
 We proceed as earlier, summing property and crop damage across all evtypes.
 
@@ -1001,7 +1017,7 @@ kable(list(data.frame(rank = 1:10), top_property_dmg, data.frame(),data.frame(),
 </tbody>
 </table>
 
-As mentioned in the previous section, the amounts for **hurricane (typhoon)** 
+As mentioned in the previous section, the amounts for `hurricane (typhoon)`
 are **only** for wind damage on coastal communities. Hurricane-caused flooding,
 *etc.* are grouped into separate `evtypes`.
 
