@@ -6,27 +6,28 @@ output:
         theme: united
         highlight: pygments
         keep_md: true
+        number_sections: true
 ---
 
 
-*Most recent update: 2021-12-27*
+*Most recent update: 2022-01-03*
 
-## Synopsis
+# Synopsis
 *Immediately after the title, there should be a synopsis which describes and 
 summarizes your analysis in at most 10 complete sentences.*
 
-## Data Processing
+# Data Processing
 
-We'll load libraries first and 
+We'll load libraries first.
+
 
 ```r
 # One function from data.table is also required, "fread". We won't load the
 # entire package because its namespace overlaps some other functions we use.
 suppressPackageStartupMessages(library(tidyverse))
-suppressPackageStartupMessages(library(lubridate))
 suppressPackageStartupMessages(library(kableExtra))  # table formatting tools
 
-# global table styling options set here by overriding kable()
+# Set global table styling options here by overriding kable()
 kable <- function(data, ...) {
     knitr::kable(data, format.args = list(big.mark = ","), ...) %>% 
         kable_classic(full_width=FALSE, position="left")
@@ -34,8 +35,9 @@ kable <- function(data, ...) {
 ```
 
 Next we load the data, rename two variables with cumbersome names,
-remove two variables, and standardize the values of `evtype` to lowercase
-with no extra spaces.
+remove two variables which contain no informatin, and standardize the values 
+of `evtype` to lowercase with no extra spaces.
+
 
 ```r
 df <- as_tibble(data.table::fread(file = "repdata_data_StormData.csv.bz2"))
@@ -49,15 +51,16 @@ df <- select(df, -c(county_end, countyendn))
 df$evtype <- tolower(str_squish(df$evtype))
 ```
 
-### Correcting `propdmgexp` and `cropdmgexp`
+## Correcting `propdmgexp` and `cropdmgexp`
 
-Damage amounts are represented in an unusual way. They are expressed in
-scientific notation, with the base and exponent stored in separate variables.
+In the raw data, damage amounts are represented in an unusual way. They are 
+expressed in scientific notation, with the base and exponent stored in 
+separate variables.
 
 The exponents, `propdmgexp` and `cropdmgexp`,  are supposed to
 represent a power of 10, which is multiplied by `propdmg` or `cropdmg`
 respectively to express a final damage amount. However, they actually
-contain unusual values:
+contain unusual character values:
 
 
 ```r
@@ -104,7 +107,7 @@ df$propdmgexp <- pnew
 rm(ctmp, ptmp, cnew, pnew, old, new, i)
 ```
 
-### Fixing `evtype`
+## Fixing `evtype`
 
 `evtype` may be the most important variable in our dataset. It is the
 variable that categorizes each event as "tornado", "flood" and so forth.
@@ -115,7 +118,8 @@ important that they reflect the categories we think they do.
 In the NOAA documentation there are 48 official `evtype` values, corresponding
 to the various weather events they wish to record data for.
 
-In the dataset however, almost 1000 unique values exist. An examination
+In the dataset however, 883 unique values exist
+after standardizing to lowercase. An examination of the values
 shows this to have probably resulted from manual data entry. For example,
 here we list types relating to blizzards.
 
@@ -126,11 +130,11 @@ df %>%
     arrange(desc(n)) %>% 
     filter(str_detect(evtype, "blizzard")) %>% 
     head(n=7) %>% 
-    kable(caption = 'A sample of blizzard-related evtypes')
+    kable(caption = 'Counts of blizzard-related evtypes')
 ```
 
 <table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
-<caption>A sample of blizzard-related evtypes</caption>
+<caption>Counts of blizzard-related evtypes</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> evtype </th>
@@ -171,8 +175,10 @@ df %>%
 
 We can see that `"blizzard"` labels most of the observations, with a small number of
 other observations given similar-sounding labels. These observations should probably be
-a part of `"blizzard"`. With over 1000 types in the dataset, We'd like to know 
+a part of `"blizzard"`. With over 800 types in the dataset, We'd like to know 
 if this example represents a systematic problem. 
+
+### What proportion of `evtypes` are problematic?
 
 We constructed a list of official evtypes from NOAA documentation and
 stored it in `evtypes.txt`. We wish to know
@@ -180,7 +186,7 @@ stored it in `evtypes.txt`. We wish to know
 
 
 ```r
-types <- tolower(readLines("evtypes.txt")) # a vector of standard values
+types <- tolower(readLines("evtypes.txt")) # a vector of standard evtypes
 df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 ```
 
@@ -193,7 +199,70 @@ e.g. if one major event type
 were split into many smaller types it might no longer appear to be a major
 cause of damage.
 
-Let's count how many non-standard `evtype` strings label 100 or more observations
+What we don't know yet is how these 30% of records are distributed among 
+non-standard `evtypes`.  i.e. Are they evenly distributed amongst the thousand
+or so values (a worst-case scenario) or do a small number of strings
+represent the majority of these problematic observations?
+
+### How many non-standard `evtypes` do we need to fix?
+
+We'll next group non-standard observations by their `evtype` and count the
+observations by type. We'll also sort these counts and calculate a cumulative
+proportion of the observations.
+
+
+```r
+df %>% 
+    filter(! evtype %in% types) %>% 
+    count(evtype) %>% 
+    arrange(desc(n)) %>%  
+    mutate(proportion = n / sum(n), cumulative = cumsum(proportion)) %>% 
+    slice_max(n, n=4) %>% kable(caption = "Top four errors in evtype")
+```
+
+<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<caption>Top four errors in evtype</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> evtype </th>
+   <th style="text-align:right;"> n </th>
+   <th style="text-align:right;"> proportion </th>
+   <th style="text-align:right;"> cumulative </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> tstm wind </td>
+   <td style="text-align:right;"> 219,946 </td>
+   <td style="text-align:right;"> 0.8239468 </td>
+   <td style="text-align:right;"> 0.8239468 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> thunderstorm winds </td>
+   <td style="text-align:right;"> 20,850 </td>
+   <td style="text-align:right;"> 0.0781069 </td>
+   <td style="text-align:right;"> 0.9020536 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> marine tstm wind </td>
+   <td style="text-align:right;"> 6,175 </td>
+   <td style="text-align:right;"> 0.0231324 </td>
+   <td style="text-align:right;"> 0.9251860 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> urban/sml stream fld </td>
+   <td style="text-align:right;"> 3,392 </td>
+   <td style="text-align:right;"> 0.0127069 </td>
+   <td style="text-align:right;"> 0.9378929 </td>
+  </tr>
+</tbody>
+</table>
+
+The four most common errors represent almost 94% of all non-standard
+observations.
+
+Let's pick a nice round number of observations as a cutoff value. 
+We'll count how many non-standard `evtype` strings label 100 or more observations
 in the dataset. As a reminder, there are 902297 observations in total.
 
 
@@ -211,11 +280,78 @@ length(fixtypes)
 ## [1] 32
 ```
 
-This is good news, we won't have to fix over 900 possible errors. Fixing 
-the 32 most common should ensure a much more accurate analysis.
+This is good news, we won't have to fix over 800 errors. Fixing 
+the 32 most common should ensure a much more accurate analysis. Let's calculate
+what proportion of observations we'll actually correct, if we fix `evtypes` with
+100 or more observations.
+
+
+```r
+df %>% 
+    filter(! evtype %in% types) %>% 
+    count(evtype) %>% 
+    arrange(desc(n)) %>% 
+    mutate(proportion = n / sum(n), cumulative = cumsum(proportion)) %>% 
+    filter(n > 99, n <=101) %>% kable()
+```
+
+<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> evtype </th>
+   <th style="text-align:right;"> n </th>
+   <th style="text-align:right;"> proportion </th>
+   <th style="text-align:right;"> cumulative </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> moderate snowfall </td>
+   <td style="text-align:right;"> 101 </td>
+   <td style="text-align:right;"> 0.0003784 </td>
+   <td style="text-align:right;"> 0.9843337 </td>
+  </tr>
+</tbody>
+</table>
+
+**98.4% of our problematic records will be corrected after fixing the top 32.**
+Let's visualize the situation by plotting the cumulative proportion of correct
+`evtypes`.
+
+
+```r
+x <- df %>% 
+    filter(! evtype %in% types) %>% 
+    count(evtype) %>% 
+    arrange(desc(n)) %>%  
+    mutate(proportion = n / sum(n), cumulative = cumsum(proportion)) %>% 
+    head(32) 
+tmp <- x$cumulative
+names(tmp) <- x$evtype
+par(mar = c(9,4,2,2), cex.axis = .8)
+barplot(tmp, las=2, ylim=c(0,1),
+         main="Cumulative proportion correct, after fixing evtype errors")
+abline(h=1, lty=2, col='dodgerblue2', lwd=2.5)
+```
+
+![](harmful_weather_files/figure-html/visualize_evtype_fixes-1.png)<!-- -->
+
+Fixing `tstm wind` alone will correct over 80% of the records, and then
+we see rapidly diminishing returns.
+
+Since evtype errors represent about 30% of all data, correcting these errors
+to about 98.4% accuracy (the top 32 errors) will result in an overall `evtype`
+accuracy of about `(1 - 0.3 * (1 - .984)) * 100 ~= ` 
+99.5% for the entire dataset. Improving
+further would represent vastly dimished returns, so we'll consider this
+an acceptable improvement from about 70% correct.
+
+### Fixing the selected `evtypes`
 
 What we will do is work through these 32 types systematically and assign them
-the correct `evtype`, using the NOAA documentation and some common sense. 
+the correct `evtype`, using the NOAA documentation and some common sense to
+place them in the correct category.
+
 The rest of the non-standard labels we will disregard for having too
 small an effect on the analysis to matter. Let's first look at the labels
 we'll fix.
@@ -334,10 +470,13 @@ df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 ```
 
 Excellent! Now only 0.3% of records have some unusual `evtype` from data
-entry errors. Let's make one more test. It's *possible* these small number of
+entry errors, or in other words `evtype` is now almost 99.7% correct. Earlier
+we estimated we'd see 99.5% correct, so this is reasonable.
+
+Let's make one more test. It's *possible* these small number of 
 observations are actually large in terms of human or financial damage. Let us
-compare the sum of fatalities, injuries, property damage, and crop damage of these
-remaining records to the whole.
+compare the sum of fatalities, injuries, property damage, and crop damage of the
+remaining uncorrected records to the whole.
 
 
 ```r
@@ -353,10 +492,11 @@ as_tibble(results) %>%
     mutate(non.standard.proportion = sum.non.standard / (sum.non.standard + sum.standard),
            class = rownames(results)) %>% 
     select(class, everything()) %>% 
-    kable()
+    kable(caption = "Proportions of total damage represented by non-standard evtypes")
 ```
 
 <table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<caption>Proportions of total damage represented by non-standard evtypes</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> class </th>
@@ -393,14 +533,14 @@ as_tibble(results) %>%
 </tbody>
 </table>
 
-With these non-standard cases making up at most 3.3% of their total, the dataset
+With these non-standard cases making up at most 3.3% of the total damage, the dataset
 is in much better condition than it was in raw form.
 We'll continue the analysis with this imperfect but much-improved dataset, 
 assuming that this small proportion of error won't significantly skew our results.
 
 ## Results
 
-#### Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+### Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
 
 
 Here we sum the fatalities and injuries across `evtype`, select the ten largest
@@ -454,7 +594,7 @@ From the point of view of this dataset, hurricanes may be understood as a
 'meta-event' that *causes* other events.
 
 It is also worth noting that some similar events have different official
-`evtype`s, e.g. `excessive heat` and `heat`, both of which show up in
+`evtypes`, e.g. `excessive heat` and `heat`, both of which show up in
 the graphs above.  We will leave this as is, having verified that they
 represent different categories in the NOAA documentation.
 
@@ -517,9 +657,9 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] kableExtra_1.3.4 lubridate_1.8.0  forcats_0.5.1    stringr_1.4.0   
-##  [5] dplyr_1.0.7      purrr_0.3.4      readr_2.1.1      tidyr_1.1.4     
-##  [9] tibble_3.1.6     ggplot2_3.3.5    tidyverse_1.3.1 
+##  [1] kableExtra_1.3.4 forcats_0.5.1    stringr_1.4.0    dplyr_1.0.7     
+##  [5] purrr_0.3.4      readr_2.1.1      tidyr_1.1.4      tibble_3.1.6    
+##  [9] ggplot2_3.3.5    tidyverse_1.3.1 
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] tidyselect_1.1.1  xfun_0.29         haven_2.4.3       colorspace_2.0-2 
@@ -534,8 +674,8 @@ sessionInfo()
 ## [37] systemfonts_1.0.3 fs_1.5.2          hms_1.1.1         digest_0.6.29    
 ## [41] stringi_1.7.6     grid_4.1.2        cli_3.1.0         tools_4.1.2      
 ## [45] magrittr_2.0.1    crayon_1.4.2      pkgconfig_2.0.3   ellipsis_0.3.2   
-## [49] xml2_1.3.3        reprex_2.0.1      svglite_2.0.0     rstudioapi_0.13  
-## [53] assertthat_0.2.1  rmarkdown_2.11    httr_1.4.2        R6_2.5.1         
-## [57] compiler_4.1.2
+## [49] xml2_1.3.3        reprex_2.0.1      lubridate_1.8.0   svglite_2.0.0    
+## [53] rstudioapi_0.13   assertthat_0.2.1  rmarkdown_2.11    httr_1.4.2       
+## [57] R6_2.5.1          compiler_4.1.2
 ```
 
