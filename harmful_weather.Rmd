@@ -141,7 +141,7 @@ stored it in `evtypes.txt`. We wish to know
 types <- tolower(readLines("evtypes.txt")) # a vector of standard evtypes
 df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 ```
-About 30% of the data is using some other label for `evtype`. This is
+**About 30% of the data is using some other label for `evtype`.** This is
 a significant number and could certainly skew our analysis.
 e.g. if one major event type
 were split into many smaller types it might no longer appear to be a major
@@ -167,8 +167,7 @@ df %>%
     slice_max(n, n=4) %>% kable(caption = "Top four errors in evtype")
 ```
 
-The four most common errors represent almost 94% of all non-standard
-observations.
+**The four most common errors represent almost 94% of all errors.**
 
 Let's pick a nice round number of observations as a cutoff value. 
 We'll count how many non-standard `evtype` strings label 100 or more observations
@@ -184,9 +183,9 @@ fixtypes <- df %>%
 length(fixtypes)
 ```
 
-This is good news, we won't have to fix over 800 errors. Fixing 
-the 32 most common should ensure a much more accurate analysis. Let's calculate
-what proportion of observations we'll actually correct, if we fix `evtypes` with
+This is good news, we won't have to fix over 800 errors. **Fixing
+the 32 most common** should ensure a much more accurate analysis. Let's calculate
+what proportion of observations will be correct, if we fix `evtypes` with
 100 or more observations.
 
 ```{r}
@@ -290,8 +289,10 @@ df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 ```
 
 Excellent! Now only 0.3% of records have some unusual `evtype` from data
-entry errors, or in other words `evtype` is now almost 99.7% correct. Earlier
+entry errors, or in other words **`evtype` is now almost 99.7% correct.** Earlier
 we estimated we'd see 99.5% correct, so this is reasonable.
+
+#### A final test: dollar amounts
 
 Let's make one more test. It's *possible* these small number of 
 observations are actually large in terms of human or financial damage. Let us
@@ -352,6 +353,12 @@ barplot(top_injuries$injuries, names.arg = top_injuries$evtype, las=2,
 In terms of both fatalities and injuries, **tornadoes are the most destructive
 events to human health** in this dataset. 
 
+```{r table_top_fatality_injury}
+kable(list(data.frame(rank = 1:10), top_fatalities, data.frame(),data.frame(), top_injuries),
+      caption = "Top causes, fatalities & injuries")
+```
+
+
 #### Hurricanes?
 
 There appears to be something missing in the above graphs. Knowing something of 
@@ -398,7 +405,13 @@ barplot(top_crop_dmg$crop, names.arg = top_crop_dmg$evtype, las=2,
         main="Crop damage: top causes")
 ```
 
-As mentioned in the previous section, the amounts for **hurricane (typhoon)** 
+```{r table_top_damage}
+kable(list(data.frame(rank = 1:10), top_property_dmg, data.frame(),data.frame(), 
+           top_crop_dmg),
+      caption = "Top causes, property & crop damage")
+```
+
+As mentioned in the previous section, the amounts for `hurricane (typhoon)`
 are **only** for wind damage on coastal communities. Hurricane-caused flooding,
 *etc.* are grouped into separate `evtypes`.
 

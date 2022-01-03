@@ -193,7 +193,7 @@ df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 ```
 ## [1] 0.2958472
 ```
-About 30% of the data is using some other label for `evtype`. This is
+**About 30% of the data is using some other label for `evtype`.** This is
 a significant number and could certainly skew our analysis.
 e.g. if one major event type
 were split into many smaller types it might no longer appear to be a major
@@ -258,8 +258,7 @@ df %>%
 </tbody>
 </table>
 
-The four most common errors represent almost 94% of all non-standard
-observations.
+**The four most common errors represent almost 94% of all errors.**
 
 Let's pick a nice round number of observations as a cutoff value. 
 We'll count how many non-standard `evtype` strings label 100 or more observations
@@ -280,9 +279,9 @@ length(fixtypes)
 ## [1] 32
 ```
 
-This is good news, we won't have to fix over 800 errors. Fixing 
-the 32 most common should ensure a much more accurate analysis. Let's calculate
-what proportion of observations we'll actually correct, if we fix `evtypes` with
+This is good news, we won't have to fix over 800 errors. **Fixing
+the 32 most common** should ensure a much more accurate analysis. Let's calculate
+what proportion of observations will be correct, if we fix `evtypes` with
 100 or more observations.
 
 
@@ -470,8 +469,10 @@ df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 ```
 
 Excellent! Now only 0.3% of records have some unusual `evtype` from data
-entry errors, or in other words `evtype` is now almost 99.7% correct. Earlier
+entry errors, or in other words **`evtype` is now almost 99.7% correct.** Earlier
 we estimated we'd see 99.5% correct, so this is reasonable.
+
+#### A final test: dollar amounts
 
 Let's make one more test. It's *possible* these small number of 
 observations are actually large in terms of human or financial damage. Let us
@@ -575,6 +576,194 @@ barplot(top_injuries$injuries, names.arg = top_injuries$evtype, las=2,
 In terms of both fatalities and injuries, **tornadoes are the most destructive
 events to human health** in this dataset. 
 
+
+```r
+kable(list(data.frame(rank = 1:10), top_fatalities, data.frame(),data.frame(), top_injuries),
+      caption = "Top causes, fatalities & injuries")
+```
+
+<table class="kable_wrapper lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<caption>Top causes, fatalities &amp; injuries</caption>
+<tbody>
+  <tr>
+   <td> 
+
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> rank </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 7 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 9 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 10 </td>
+  </tr>
+</tbody>
+</table>
+
+ </td>
+   <td> 
+
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> evtype </th>
+   <th style="text-align:right;"> fatalities </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> tornado </td>
+   <td style="text-align:right;"> 5,633 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> excessive heat </td>
+   <td style="text-align:right;"> 1,943 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> thunderstorm wind </td>
+   <td style="text-align:right;"> 1,454 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> flash flood </td>
+   <td style="text-align:right;"> 978 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> heat </td>
+   <td style="text-align:right;"> 937 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> lightning </td>
+   <td style="text-align:right;"> 816 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rip current </td>
+   <td style="text-align:right;"> 577 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> flood </td>
+   <td style="text-align:right;"> 554 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> avalanche </td>
+   <td style="text-align:right;"> 224 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> winter storm </td>
+   <td style="text-align:right;"> 206 </td>
+  </tr>
+</tbody>
+</table>
+
+ </td>
+   <td> 
+
+<table>
+<tbody>
+  <tr>
+
+  </tr>
+</tbody>
+</table>
+
+ </td>
+   <td> 
+
+<table>
+<tbody>
+  <tr>
+
+  </tr>
+</tbody>
+</table>
+
+ </td>
+   <td> 
+
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> evtype </th>
+   <th style="text-align:right;"> injuries </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> tornado </td>
+   <td style="text-align:right;"> 91,346 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> thunderstorm wind </td>
+   <td style="text-align:right;"> 11,526 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> flood </td>
+   <td style="text-align:right;"> 6,902 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> excessive heat </td>
+   <td style="text-align:right;"> 6,542 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> lightning </td>
+   <td style="text-align:right;"> 5,230 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> heat </td>
+   <td style="text-align:right;"> 2,100 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> ice storm </td>
+   <td style="text-align:right;"> 1,975 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> flash flood </td>
+   <td style="text-align:right;"> 1,777 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> wildfire </td>
+   <td style="text-align:right;"> 1,456 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> hail </td>
+   <td style="text-align:right;"> 1,361 </td>
+  </tr>
+</tbody>
+</table>
+
+ </td>
+  </tr>
+</tbody>
+</table>
+
+
 #### Hurricanes?
 
 There appears to be something missing in the above graphs. Knowing something of 
@@ -623,6 +812,194 @@ barplot(top_crop_dmg$crop, names.arg = top_crop_dmg$evtype, las=2,
 ```
 
 ![](harmful_weather_files/figure-html/calculate_damages-1.png)<!-- -->
+
+
+```r
+kable(list(data.frame(rank = 1:10), top_property_dmg, data.frame(),data.frame(), 
+           top_crop_dmg),
+      caption = "Top causes, property & crop damage")
+```
+
+<table class="kable_wrapper lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<caption>Top causes, property &amp; crop damage</caption>
+<tbody>
+  <tr>
+   <td> 
+
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> rank </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 7 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 9 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 10 </td>
+  </tr>
+</tbody>
+</table>
+
+ </td>
+   <td> 
+
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> evtype </th>
+   <th style="text-align:right;"> property </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> flood </td>
+   <td style="text-align:right;"> 150,751,456,324 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> hurricane (typhoon) </td>
+   <td style="text-align:right;"> 84,656,180,010 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tornado </td>
+   <td style="text-align:right;"> 56,937,162,897 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> storm surge/tide </td>
+   <td style="text-align:right;"> 47,974,149,000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> thunderstorm wind </td>
+   <td style="text-align:right;"> 17,749,372,097 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> flash flood </td>
+   <td style="text-align:right;"> 16,140,865,011 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> hail </td>
+   <td style="text-align:right;"> 15,732,269,877 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> wildfire </td>
+   <td style="text-align:right;"> 7,766,963,500 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tropical storm </td>
+   <td style="text-align:right;"> 7,703,890,550 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> winter storm </td>
+   <td style="text-align:right;"> 6,688,497,260 </td>
+  </tr>
+</tbody>
+</table>
+
+ </td>
+   <td> 
+
+<table>
+<tbody>
+  <tr>
+
+  </tr>
+</tbody>
+</table>
+
+ </td>
+   <td> 
+
+<table>
+<tbody>
+  <tr>
+
+  </tr>
+</tbody>
+</table>
+
+ </td>
+   <td> 
+
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> evtype </th>
+   <th style="text-align:right;"> crop </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> drought </td>
+   <td style="text-align:right;"> 13,972,566,000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> flood </td>
+   <td style="text-align:right;"> 10,853,820,100 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> hurricane (typhoon) </td>
+   <td style="text-align:right;"> 5,505,292,800 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> ice storm </td>
+   <td style="text-align:right;"> 5,022,113,500 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> hail </td>
+   <td style="text-align:right;"> 3,025,954,650 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> thunderstorm wind </td>
+   <td style="text-align:right;"> 2,159,320,250 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> flash flood </td>
+   <td style="text-align:right;"> 1,421,317,100 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> extreme cold/wind chill </td>
+   <td style="text-align:right;"> 1,312,973,000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> frost/freeze </td>
+   <td style="text-align:right;"> 1,094,186,000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> heavy rain </td>
+   <td style="text-align:right;"> 733,399,800 </td>
+  </tr>
+</tbody>
+</table>
+
+ </td>
+  </tr>
+</tbody>
+</table>
 
 As mentioned in the previous section, the amounts for **hurricane (typhoon)** 
 are **only** for wind damage on coastal communities. Hurricane-caused flooding,
