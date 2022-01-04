@@ -1,5 +1,5 @@
 ---
-title: "Harmful Effects of Severe Weather"
+title: "Harmful Effects of Severe Weather, 1950 - 2011"
 author: "Andrew Luyt"
 output: 
     html_document:
@@ -7,10 +7,11 @@ output:
         highlight: pygments
         keep_md: true
         number_sections: true
+        toc: true
 ---
 
 
-*Most recent update: 2022-01-03*
+*Most recent update: 2022-01-04*
 
 # Synopsis
 
@@ -32,15 +33,15 @@ We'll load libraries first.
 
 
 ```r
-# One function from data.table is also required, "fread". We won't load the
-# entire package because its namespace overlaps some other functions we use.
+# data.table::fread() is also required. We won't load the entire
+# package because its namespace overlaps some other functions we use.
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(kableExtra))  # table formatting tools
 
 # Set global table styling options here by overriding kable()
 kable <- function(data, ...) {
     knitr::kable(data, format.args = list(big.mark = ","), ...) %>% 
-        kable_classic(full_width=FALSE, position="left")
+        kable_styling(full_width=FALSE, position="left")
 }
 ```
 
@@ -89,7 +90,7 @@ sort(union(unique(df$propdmgexp), unique(df$cropdmgexp)))
 After some investigation, it appears varying data entry standards or data
 entry error has resulted in this state of affairs. A power of 10 will be
 assigned to replace each of these symbols.
-[*For a more complete discussion, see [this Rpubs document](https://rstudio-pubs-static.s3.amazonaws.com/58957_37b6723ee52b455990e149edde45e5b6.html).*]
+[*For a more complete discussion, see [this document](https://rstudio-pubs-static.s3.amazonaws.com/58957_37b6723ee52b455990e149edde45e5b6.html).*]
 
 * `empty string`: 0
 * `+` or `?`: 1
@@ -147,7 +148,7 @@ df %>%
     kable(caption = 'Counts of blizzard-related evtypes')
 ```
 
-<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<table class="table" style="width: auto !important; ">
 <caption>Counts of blizzard-related evtypes</caption>
  <thead>
   <tr>
@@ -234,7 +235,7 @@ df %>%
     slice_max(n, n=4) %>% kable(caption = "Top four errors in evtype")
 ```
 
-<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<table class="table" style="width: auto !important; ">
 <caption>Top four errors in evtype</caption>
  <thead>
   <tr>
@@ -308,7 +309,7 @@ df %>%
     filter(n > 99, n <=101) %>% kable()
 ```
 
-<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<table class="table" style="width: auto !important; ">
  <thead>
   <tr>
    <th style="text-align:left;"> evtype </th>
@@ -355,17 +356,18 @@ we see rapidly diminishing returns.
 Since evtype errors represent about 30% of all records, correcting these errors
 to about 98.4% accuracy (the top 32 errors) will result in an overall `evtype`
 accuracy of about `(1 - 0.3 * (1 - .984)) * 100 ~= ` 
-99.5% for the entire dataset. Improving
-further would represent vastly dimished returns, so we'll consider this
+99.5% for the entire dataset. Further
+improvements would be via vastly diminished returns, so we'll consider this
 an acceptable improvement over the original data at about 70% correct.
 
 ### Fixing the selected `evtypes`
 
-What we will do is work through these 32 types systematically and assign them
+We will work through these 32 types systematically and assign them
 the correct `evtype`, using the NOAA documentation and some common sense to
 place them in the correct category.
 
-The rest of the non-standard labels we will disregard for having too
+The rest of the non-standard labels we will leave unchanged, assuming they
+have too
 small an effect on the analysis to matter. Let's first look at the labels
 we'll fix.
 
@@ -374,7 +376,7 @@ we'll fix.
 kable(matrix(fixtypes, nrow = 8), caption = "The 32 most important evtypes to correct")
 ```
 
-<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<table class="table" style="width: auto !important; ">
 <caption>The 32 most important evtypes to correct</caption>
 <tbody>
   <tr>
@@ -482,7 +484,7 @@ df %>% filter(! evtype %in% types) %>% nrow() / nrow(df)
 ## [1] 0.003188529
 ```
 
-Excellent! Now only 0.3% of records have some unusual `evtype` from data
+Now, only 0.3% of records have some unusual `evtype` from data
 entry errors, or in other words **`evtype` is now almost 99.7% correct.** Earlier
 we estimated we'd see 99.5% correct, so this is reasonable.
 
@@ -493,7 +495,7 @@ observations are actually large in terms of human or financial damage. Let us
 compare the sum of fatalities, injuries, property damage, and crop damage of the
 remaining uncorrected records to the whole. If our suppositions are correct,
 the records with non-standard `evtypes` will be only a small percentage of the total
-amounts of damage, etc.
+damage.
 
 
 ```r
@@ -512,7 +514,7 @@ as_tibble(results) %>%
     kable(caption = "Proportions of total damage represented by non-standard evtypes")
 ```
 
-<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
+<table class="table" style="width: auto !important; ">
 <caption>Proportions of total damage represented by non-standard evtypes</caption>
  <thead>
   <tr>
@@ -578,11 +580,12 @@ top_injuries <- df %>%
     slice_head(n = 10)
 ```
 
-
 ```r
 par(mfrow = c(1,2), mar=c(c(8, 4, 4, 2) + 0.1), cex.axis=.9)
 barplot(top_fatalities$fatalities, names.arg = top_fatalities$evtype, las=2,
         main="Fatalities: top causes")
+mtext(text = "Data source: U.S. NOAA storm database, 1950-2011", outer = T,
+      line = -25, cex = .7)
 barplot(top_injuries$injuries, names.arg = top_injuries$evtype, las=2,
         main="Injuries: top causes")
 ```
@@ -595,11 +598,11 @@ events to human health** in this dataset.
 
 ```r
 kable(list(data.frame(rank = 1:10), top_fatalities, data.frame(),data.frame(), top_injuries),
-      caption = "Top causes, fatalities & injuries")
+      caption = "Top causes: fatalities & injuries")
 ```
 
-<table class="kable_wrapper lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
-<caption>Top causes, fatalities &amp; injuries</caption>
+<table class="kable_wrapper table" style="width: auto !important; ">
+<caption>Top causes: fatalities &amp; injuries</caption>
 <tbody>
   <tr>
    <td> 
@@ -798,10 +801,14 @@ Hurricane-spawned tornadoes are also included in the tornado events graphed abov
 From the point of view of this dataset, hurricanes may be understood as a
 'meta-event' that *causes* other events.
 
+### Why is there both `heat` and `excessive heat`?
+
 It is also worth noting that some similar events have different official
 `evtypes`, e.g. `excessive heat` and `heat`, both of which show up in
-the graphs above.  *We will leave this as is, having verified that they
-represent seperate categories in the NOAA documentation.*
+the graphs above.  We examined the NOAA documentation that accompanies the
+dataset and verified that they are indeed separate, official categories. 
+*We will leave the situation as is*, assuming the NOAA has good reason to
+organize their data thus.
 
 ## Across the United States, which types of events have the greatest economic consequences?
 
@@ -823,6 +830,8 @@ top_crop_dmg <- df %>%
 par(mfrow=c(1,2), mar=c(c(9, 5, 4, 2) + 0.1), cex.axis=.9, mgp = c(4, 1, 0))
 barplot(top_property_dmg$property, names.arg = top_property_dmg$evtype, las=2,
         main="Property damage: top causes", ylab = "US Dollars")
+mtext(text = "Data source: U.S. NOAA storm database, 1950-2011", outer = T,
+      line = -25, cex = .7)
 barplot(top_crop_dmg$crop, names.arg = top_crop_dmg$evtype, las=2,
         main="Crop damage: top causes")
 ```
@@ -833,11 +842,11 @@ barplot(top_crop_dmg$crop, names.arg = top_crop_dmg$evtype, las=2,
 ```r
 kable(list(data.frame(rank = 1:10), top_property_dmg, data.frame(),data.frame(), 
            top_crop_dmg),
-      caption = "Top causes, property & crop damage")
+      caption = "Top causes: property & crop damage")
 ```
 
-<table class="kable_wrapper lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; width: auto !important; '>
-<caption>Top causes, property &amp; crop damage</caption>
+<table class="kable_wrapper table" style="width: auto !important; ">
+<caption>Top causes: property &amp; crop damage</caption>
 <tbody>
   <tr>
    <td> 
@@ -1022,7 +1031,7 @@ are **only** for wind damage on coastal communities. Hurricane-caused flooding,
 *etc.* are grouped into separate `evtypes`.
 
 <br/>
-<hr />
+<hr noshade/>
 To aid reproducibility, here is the session environment at time of publishing.
 
 ```r
