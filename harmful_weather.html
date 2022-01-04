@@ -282,7 +282,7 @@ pre code {
 <p><em>Most recent update: 2022-01-04</em></p>
 <div id="synopsis" class="section level1" number="1">
 <h1 number="1"><span class="header-section-number">1</span> Synopsis</h1>
-<p>In this analysis we will report on the top weather-related causes of human death &amp; injury and property &amp; crop damage. To calculate these sums we will use the NOAA’s data set of weather events and associated damage for events between 1950 and November 2011. We spend substantial effort correcting manual data entry inconsistencies in the <code>evtype</code> variable, and note that damage caused by hurricanes is split up into multiple categories, for instance flood and hail.</p>
+<p>In this analysis we will report on the top weather-related causes of human death &amp; injury and property &amp; crop damage. To calculate these sums we will use the NOAA’s data set of weather events and associated damage for events in the USA between 1950 and November 2011. We spend substantial effort correcting manual data entry inconsistencies in the <code>evtype</code> variable, and note that damage caused by hurricanes is split up into multiple categories, for instance flood and hail.</p>
 <p>We find the most damaging weather event to human health is the tornado, and the most damaging weather events to property and crops are flooding and droughts, respectively.</p>
 </div>
 <div id="data-processing" class="section level1" number="2">
@@ -1497,7 +1497,8 @@ heavy rain
 </tbody>
 </table>
 <p>As mentioned in the previous section, the amounts for <code>hurricane (typhoon)</code> are <strong>only</strong> for wind damage on coastal communities. Hurricane-caused flooding, <em>etc.</em> are grouped into separate <code>evtypes</code>.</p>
-<br />
+<hr noshade />
+<a href="https://andrewluyt.github.io/">author website: andrewluyt.github.io</a>
 <hr noshade />
 <p>To aid reproducibility, here is the session environment at time of publishing.</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>

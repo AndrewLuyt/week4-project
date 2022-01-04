@@ -13,11 +13,12 @@ output:
 
 *Most recent update: 2022-01-04*
 
+
 # Synopsis
 
 In this analysis we will report on the top weather-related causes of human death & injury
 and property & crop damage. To calculate these sums we will use the NOAA's data
-set of weather events and associated damage for events between
+set of weather events and associated damage for events in the USA between
 1950 and November 2011. We spend substantial effort correcting manual data
 entry inconsistencies in the `evtype` variable, and note that damage caused
 by hurricanes is split up into multiple categories, for instance flood and hail.
@@ -1030,7 +1031,8 @@ As mentioned in the previous section, the amounts for `hurricane (typhoon)`
 are **only** for wind damage on coastal communities. Hurricane-caused flooding,
 *etc.* are grouped into separate `evtypes`.
 
-<br/>
+<hr noshade />
+[author website: andrewluyt.github.io](https://andrewluyt.github.io/)
 <hr noshade/>
 To aid reproducibility, here is the session environment at time of publishing.
 
