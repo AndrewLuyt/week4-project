@@ -11,10 +11,14 @@ output:
 ---
 
 
-*Most recent update: 2022-01-04*
+*Most recent update: 2022-01-11*
 
 
 # Synopsis
+
+This report is a final project for the course 
+[Reproducible Research](https://www.coursera.org/learn/reproducible-research) by
+Johns Hopkins University.
 
 In this analysis we will report on the top weather-related causes of human death & injury
 and property & crop damage. To calculate these sums we will use the NOAA's data
@@ -560,7 +564,7 @@ assuming that this small proportion of error won't significantly skew our result
 
 # Results
 
-## Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+## Across the United States, which types of events are most harmful to population health?
 
 
 Here we sum the fatalities and injuries across `evtype`, select the ten largest
@@ -1061,25 +1065,25 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] kableExtra_1.3.4 forcats_0.5.1    stringr_1.4.0    dplyr_1.0.7     
-##  [5] purrr_0.3.4      readr_2.1.1      tidyr_1.1.4      tibble_3.1.6    
-##  [9] ggplot2_3.3.5    tidyverse_1.3.1 
+##  [1] kableExtra_1.3.4 lubridate_1.8.0  forcats_0.5.1    stringr_1.4.0   
+##  [5] dplyr_1.0.7      purrr_0.3.4      readr_2.1.1      tidyr_1.1.4     
+##  [9] tibble_3.1.6     ggplot2_3.3.5    tidyverse_1.3.1 
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_1.1.1  xfun_0.29         haven_2.4.3       colorspace_2.0-2 
-##  [5] vctrs_0.3.8       generics_0.1.1    viridisLite_0.4.0 htmltools_0.5.2  
-##  [9] yaml_2.2.1        utf8_1.2.2        rlang_0.4.12      jquerylib_0.1.4  
-## [13] pillar_1.6.4      glue_1.6.0        withr_2.4.3       DBI_1.1.2        
-## [17] dbplyr_2.1.1      modelr_0.1.8      readxl_1.3.1      lifecycle_1.0.1  
-## [21] munsell_0.5.0     gtable_0.3.0      cellranger_1.1.0  rvest_1.0.2      
-## [25] evaluate_0.14     knitr_1.37        tzdb_0.2.0        fastmap_1.1.0    
-## [29] fansi_0.5.0       highr_0.9         broom_0.7.10      Rcpp_1.0.7       
-## [33] backports_1.4.1   scales_1.1.1      webshot_0.5.2     jsonlite_1.7.2   
-## [37] systemfonts_1.0.3 fs_1.5.2          hms_1.1.1         digest_0.6.29    
-## [41] stringi_1.7.6     grid_4.1.2        cli_3.1.0         tools_4.1.2      
-## [45] magrittr_2.0.1    crayon_1.4.2      pkgconfig_2.0.3   ellipsis_0.3.2   
-## [49] xml2_1.3.3        reprex_2.0.1      lubridate_1.8.0   svglite_2.0.0    
-## [53] rstudioapi_0.13   assertthat_0.2.1  rmarkdown_2.11    httr_1.4.2       
-## [57] R6_2.5.1          compiler_4.1.2
+##  [1] Rcpp_1.0.7        svglite_2.0.0     assertthat_0.2.1  digest_0.6.29    
+##  [5] utf8_1.2.2        R6_2.5.1          cellranger_1.1.0  backports_1.4.1  
+##  [9] reprex_2.0.1      evaluate_0.14     httr_1.4.2        highr_0.9        
+## [13] pillar_1.6.4      rlang_0.4.12      readxl_1.3.1      rstudioapi_0.13  
+## [17] jquerylib_0.1.4   rmarkdown_2.11    webshot_0.5.2     munsell_0.5.0    
+## [21] broom_0.7.11      compiler_4.1.2    modelr_0.1.8      xfun_0.29        
+## [25] pkgconfig_2.0.3   systemfonts_1.0.3 htmltools_0.5.2   tidyselect_1.1.1 
+## [29] codetools_0.2-18  fansi_0.5.0       viridisLite_0.4.0 crayon_1.4.2     
+## [33] tzdb_0.2.0        dbplyr_2.1.1      withr_2.4.3       grid_4.1.2       
+## [37] jsonlite_1.7.2    gtable_0.3.0      lifecycle_1.0.1   DBI_1.1.2        
+## [41] magrittr_2.0.1    scales_1.1.1      cli_3.1.0         stringi_1.7.6    
+## [45] fs_1.5.2          xml2_1.3.3        ellipsis_0.3.2    generics_0.1.1   
+## [49] vctrs_0.3.8       tools_4.1.2       glue_1.6.0        hms_1.1.1        
+## [53] fastmap_1.1.0     yaml_2.2.1        colorspace_2.0-2  rvest_1.0.2      
+## [57] knitr_1.37        haven_2.4.3
 ```
 

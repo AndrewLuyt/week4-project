@@ -11,12 +11,16 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 *Most recent update: `r Sys.Date()`*
 
 
 # Synopsis
+
+This report is a final project for the course 
+[Reproducible Research](https://www.coursera.org/learn/reproducible-research) by
+Johns Hopkins University.
 
 In this analysis we will report on the top weather-related causes of human death & injury
 and property & crop damage. To calculate these sums we will use the NOAA's data
@@ -341,7 +345,7 @@ assuming that this small proportion of error won't significantly skew our result
 
 # Results
 
-## Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+## Across the United States, which types of events are most harmful to population health?
 
 
 Here we sum the fatalities and injuries across `evtype`, select the ten largest
