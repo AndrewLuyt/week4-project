@@ -279,7 +279,7 @@ pre code {
 </ul>
 </div>
 
-<p><em>Most recent update: 2022-01-11</em></p>
+<p><em>Most recent update: 2022-01-15</em></p>
 <div id="synopsis" class="section level1" number="1">
 <h1 number="1"><span class="header-section-number">1</span> Synopsis</h1>
 <p>This report is a final project for the course <a href="https://www.coursera.org/learn/reproducible-research">Reproducible Research</a> by Johns Hopkins University.</p>
@@ -767,13 +767,16 @@ moderate snowfall
 <span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>evtype <span class="ot">&lt;-</span> tmp</span>
 <span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(tmp)</span></code></pre></div>
+<div id="how-well-did-the-corrections-work" class="section level4" number="2.2.3.1">
+<h4 number="2.2.3.1"><span class="header-section-number">2.2.3.1</span> How well did the corrections work?</h4>
 <p>Previously, almost 30% of records had an incorrect <code>evtype</code>. Let’s recalculate that proportion.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span> evtype <span class="sc">%in%</span> types) <span class="sc">%&gt;%</span> <span class="fu">nrow</span>() <span class="sc">/</span> <span class="fu">nrow</span>(df)</span></code></pre></div>
 <pre><code>## [1] 0.003188529</code></pre>
 <p>Now, only 0.3% of records have some unusual <code>evtype</code> from data entry errors, or in other words <strong><code>evtype</code> is now almost 99.7% correct.</strong> Earlier we estimated we’d see 99.5% correct, so this is reasonable.</p>
-<div id="a-final-test-dollar-amounts" class="section level4" number="2.2.3.1">
-<h4 number="2.2.3.1"><span class="header-section-number">2.2.3.1</span> A final test: dollar amounts</h4>
-<p>Let’s make one more test. It’s <em>possible</em> these small number of observations are actually large in terms of human or financial damage. Let us compare the sum of fatalities, injuries, property damage, and crop damage of the remaining uncorrected records to the whole. If our suppositions are correct, the records with non-standard <code>evtypes</code> will be only a small percentage of the total damage.</p>
+</div>
+<div id="a-final-test-dollar-amounts" class="section level4" number="2.2.3.2">
+<h4 number="2.2.3.2"><span class="header-section-number">2.2.3.2</span> A final test: dollar amounts</h4>
+<p>Let’s make one more test. It’s <em>possible</em> these small number of observations are actually large in terms of human or financial damage. Let us examine the fatalities, injuries, property damage, and crop damage for the remaining uncorrected records. If our suppositions are correct, these remaining records with non-standard <code>evtypes</code> will comprise only a small percentage of the total damage.</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> </span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">property =</span> propdmg<span class="sc">*</span>propdmgexp, <span class="at">crops =</span> cropdmg<span class="sc">*</span>cropdmgexp) <span class="sc">%&gt;%</span> </span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="st">&quot;standard_evtypes&quot;</span> <span class="ot">=</span> evtype <span class="sc">%in%</span> types) <span class="sc">%&gt;%</span> </span>

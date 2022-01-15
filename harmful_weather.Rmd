@@ -303,6 +303,8 @@ df$evtype <- tmp
 rm(tmp)
 ```
 
+#### How well did the corrections work?
+
 Previously, almost 30% of records had an incorrect `evtype`. Let's recalculate 
 that proportion.
 ```{r how_effective_was_fixing_names}
@@ -317,10 +319,10 @@ we estimated we'd see 99.5% correct, so this is reasonable.
 
 Let's make one more test. It's *possible* these small number of 
 observations are actually large in terms of human or financial damage. Let us
-compare the sum of fatalities, injuries, property damage, and crop damage of the
-remaining uncorrected records to the whole. If our suppositions are correct,
-the records with non-standard `evtypes` will be only a small percentage of the total
-damage.
+examine the fatalities, injuries, property damage, and crop damage for the
+remaining uncorrected records. If our suppositions are correct,
+these remaining records with non-standard `evtypes` will comprise only a small 
+percentage of the total damage.
 
 ```{r check_nonstandard_sums}
 results <- df %>% 
